@@ -1,0 +1,30 @@
+{
+  "name": "Med-Monitor — Salud Personal",
+  "short_name": "Med-Monitor",
+  "description": "Control de medicamentos y monitoreo de presión arterial",
+  "lang": "es",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f2f2f7",
+  "theme_color": "#007AFF",
+  "icons": [
+    {
+      "src": "/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

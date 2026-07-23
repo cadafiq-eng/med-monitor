@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Med-Monitor</title>
+<link rel="manifest" href="/manifest.json"/>
+<meta name="theme-color" content="#007AFF"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Med-Monitor"/>
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png"/>
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png"/>
+<style>
+:root{
+  --bg:#f2f2f7;--surface:#fff;--text:#1c1c1e;--sub:#6c6c70;
+  --border:#e0e0e5;--divider:#e5e5ea;--shadow:rgba(0,0,0,.06);
+  --input-bg:#fff;--card-shadow:0 2px 8px rgba(0,0,0,.06);
+  --tab-bg:#fff;--header-bg:#fff;
+}
+body.dark{
+  --bg:#1c1c1e;--surface:#2c2c2e;--text:#f2f2f7;--sub:#8e8e93;
+  --border:#3a3a3c;--divider:#3a3a3c;--shadow:rgba(0,0,0,.4);
+  --input-bg:#3a3a3c;--card-shadow:0 2px 8px rgba(0,0,0,.4);
+  --tab-bg:#2c2c2e;--header-bg:#2c2c2e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);transition:background .25s,color .25s}
+
+/* ── Auth ── */
+#auth{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+#auth .card{background:var(--surface);border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 4px 24px var(--shadow)}
+#auth .logo{font-size:48px;text-align:center;margin-bottom:8px}
+#auth h1{text-align:center;font-size:22px;font-weight:700;margin-bottom:4px}
+#auth p{text-align:center;color:var(--sub);font-size:14px;margin-bottom:24px}
+#auth input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:16px;margin-bottom:12px;outline:none;background:var(--input-bg);color:var(--text)}
+#auth input:focus{border-color:#007AFF}
+#auth .btn-primary{width:100%;padding:14px;background:#007AFF;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:12px}
+#auth .btn-link{width:100%;background:none;border:none;color:#007AFF;font-size:14px;cursor:pointer;padding:4px}
+#auth .error{color:#ff3b30;font-size:13px;text-align:center;margin-bottom:8px;min-height:18px}
+
+/* ── App shell ── */
+#app{display:none;max-width:480px;margin:0 auto;padding-bottom:60px}
+header{background:var(--header-bg);padding:12px 20px;position:sticky;top:0;z-index:10;border-bottom:1px solid var(--divider);display:flex;align-items:center;justify-content:space-between}
+.header-left h1{font-size:18px;font-weight:700}
+.header-left .sub{font-size:11px;color:var(--sub);margin-top:1px}
+.header-right{display:flex;gap:6px;align-items:center}
+#btn-dark,#btn-settings{background:none;border:none;font-size:20px;cursor:pointer;padding:4px 6px;border-radius:8px}
+.sync-bar{font-size:11px;padding:3px 16px;background:var(--bg);color:var(--sub);text-align:right}
+.sync-bar.ok{color:#34c759}.sync-bar.err{color:#ff3b30}.sync-bar.spin{color:#ff9500}
+
+/* ── Tab bar ── */
+.tab-bar{position:fixed;bottom:0;left:0;right:0;background:var(--tab-bg);border-top:1px solid var(--divider);display:flex;z-index:20;max-width:480px;margin:0 auto}
+.tab-btn{flex:1;padding:10px 0 8px;border:none;background:transparent;cursor:pointer;font-size:11px;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px;transition:color .2s}
+.tab-btn .tab-ico{font-size:22px;line-height:1}
+.tab-btn.active{color:#007AFF}
+.tab-section{display:none}
+.tab-section.active{display:block}
+
+/* ── FAB ── */
+.fab{position:fixed;bottom:70px;right:24px;width:54px;height:54px;border-radius:27px;background:#007AFF;color:#fff;font-size:26px;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,122,255,.4);display:flex;align-items:center;justify-content:center;z-index:15;transition:transform .15s}
+.fab:active{transform:scale(.93)}
+.fab.presion-fab{background:#e74c3c}
+.fab.presion-fab:active{background:#c0392b}
+
+/* ── Tarjetas medicamentos ── */
+.med-list{padding:12px 14px}
+.empty{text-align:center;padding:50px 20px;color:var(--sub)}
+.empty .ico{font-size:44px;margin-bottom:10px}
+.card-med{background:var(--surface);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:var(--card-shadow)}
+.card-med .nombre{font-size:16px;font-weight:600;margin-bottom:4px}
+.card-med .info{font-size:12px;color:var(--sub);margin-bottom:8px}
+.progress{height:5px;background:var(--divider);border-radius:3px;margin-bottom:8px}
+.progress-bar{height:100%;border-radius:3px;background:#34c759;transition:width .4s}
+.progress-bar.warn{background:#ff9500}.progress-bar.danger{background:#ff3b30}
+.card-actions{display:flex;gap:6px;flex-wrap:wrap}
+.btn-sm{padding:6px 12px;border-radius:9px;border:none;font-size:12px;font-weight:600;cursor:pointer}
+.btn-tomar{background:#007AFF;color:#fff}
+.btn-reabastecer{background:#34c759;color:#fff}
+.btn-editar{background:var(--bg);color:var(--text)}
+.btn-eliminar{background:#ff3b30;color:#fff}
+.history{font-size:11px;color:var(--sub);margin-top:-4px;margin-bottom:8px;line-height:1.4}
+.tag{display:inline-block;background:#e8f1ff;color:#007AFF;border-radius:5px;padding:1px 5px;font-size:10px;font-weight:700;margin-left:5px}
+body.dark .tag{background:#1c3a5c}
+
+/* ── Presión Arterial ── */
+.pa-dashboard{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 14px 4px}
+.pa-card{background:var(--surface);border-radius:12px;padding:12px 8px;text-align:center;box-shadow:var(--card-shadow)}
+.pa-card .pa-val{font-size:24px;font-weight:700;line-height:1.1}
+.pa-card .pa-lbl{font-size:10px;color:var(--sub);margin-top:3px}
+.pa-card .pa-unit{font-size:10px;color:var(--sub)}
+.pa-list{padding:8px 14px 12px}
+.pa-row{background:var(--surface);border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:var(--card-shadow);display:flex;align-items:flex-start;gap:10px}
+.pa-cat-dot{width:10px;height:10px;border-radius:50%;flex:0 0 10px;margin-top:5px}
+.pa-row-body{flex:1;min-width:0}
+.pa-row-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.pa-vals{font-size:16px;font-weight:700}
+.pa-vals span{font-size:12px;font-weight:400;color:var(--sub)}
+.pa-meta{font-size:11px;color:var(--sub);margin-bottom:2px}
+.pa-cat-txt{font-size:11px;font-weight:600}
+.pa-notas{font-size:11px;color:var(--sub);margin-top:3px;font-style:italic}
+.pa-del{background:none;border:none;color:#ff3b30;font-size:18px;cursor:pointer;padding:2px 4px;flex:0 0 auto}
+.cat-normal{color:#27ae60}.cat-elevada{color:#d4ac0d}.cat-ht1{color:#e67e22}
+.cat-ht2{color:#c0392b}.cat-crisis{color:#7b0000}.cat-hipo{color:#2980b9}
+.dot-normal{background:#27ae60}.dot-elevada{background:#f1c40f}.dot-ht1{background:#e67e22}
+.dot-ht2{background:#c0392b}.dot-crisis{background:#4a0000}.dot-hipo{background:#2980b9}
+.pa-ref{font-size:10px;color:var(--sub);padding:0 14px 12px;text-align:center;line-height:1.6}
+
+/* ── Settings ── */
+.settings-list{padding:12px 14px}
+.settings-section{background:var(--surface);border-radius:14px;margin-bottom:12px;overflow:hidden}
+.settings-section h3{font-size:12px;font-weight:600;color:var(--sub);padding:10px 14px 6px;text-transform:uppercase;letter-spacing:.5px}
+.settings-btn{width:100%;padding:13px 14px;background:none;border:none;border-top:1px solid var(--divider);text-align:left;font-size:15px;cursor:pointer;color:var(--text);display:flex;align-items:center;gap:10px}
+.settings-btn:first-of-type{border-top:none}
+.settings-btn.danger{color:#ff3b30}
+
+/* ── Modal ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border-radius:22px 22px 0 0;padding:22px 18px 36px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal h2{font-size:17px;font-weight:700;margin-bottom:14px}
+.modal label{font-size:12px;color:var(--sub);display:block;margin-bottom:3px;margin-top:10px}
+.modal input:not([type=checkbox]),.modal select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;outline:none;background:var(--input-bg);color:var(--text);-webkit-appearance:none;appearance:none}
+.modal input:not([type=checkbox]):focus,.modal select:focus{border-color:#007AFF}
+.modal label.check-row{display:flex !important;align-items:flex-start;gap:10px;margin:12px 0 4px;font-size:14px;color:var(--text)}
+.modal label.check-row input[type=checkbox]{width:18px;height:18px;flex:0 0 18px;margin:1px 0 0;accent-color:#007AFF;cursor:pointer}
+.hint{font-size:11px;color:var(--sub);line-height:1.4;margin-top:3px;display:block}
+.modal-actions{display:flex;gap:10px;margin-top:18px}
+.modal-actions button{flex:1;padding:13px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer}
+.btn-cancel{background:var(--bg);color:var(--text)}
+.btn-save{background:#007AFF;color:#fff}
+.btn-save-red{background:#e74c3c;color:#fff}
+.modal .error{color:#ff3b30;font-size:12px;margin-top:6px;min-height:16px}
+.pa-chart-wrap{margin:0 14px 10px;background:var(--surface);border-radius:12px;padding:12px;box-shadow:var(--card-shadow);overflow:hidden}
+.pa-chart-label{font-size:12px;font-weight:600;color:var(--sub);margin-bottom:6px}
+.pa-chart-legend{display:flex;gap:14px;margin-top:6px;font-size:11px;color:var(--sub)}
+.pa-chart-legend span{display:flex;align-items:center;gap:5px}
+.pa-chart-legend span span{width:18px;height:3px;border-radius:2px;display:inline-block}
+
+/* ── Número grande PA ── */
+.pa-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth">
+  <div class="card">
+    <div class="logo">💊❤️</div>
+    <h1>Med-Monitor</h1>
+    <p>Medicamentos y presión arterial</p>
+    <div class="error" id="auth-error"></div>
+    <input type="email"    id="auth-email"    placeholder="Correo electrónico" autocomplete="email"/>
+    <input type="password" id="auth-pass"     placeholder="Contraseña" autocomplete="current-password"/>
+    <button class="btn-primary" id="btn-login">Entrar</button>
+    <button class="btn-link"    id="btn-toggle">¿No tienes cuenta? Regístrate</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="header-left">
+      <h1 id="header-title">💊 Medicamentos</h1>
+      <div class="sub" id="user-email"></div>
+    </div>
+    <div class="header-right">
+      <button id="btn-dark" title="Cambiar tema">🌙</button>
+    </div>
+  </header>
+  <div class="sync-bar" id="sync-bar">● Cargando…</div>
+
+  <!-- TAB: Medicamentos -->
+  <div class="tab-section active" id="tab-meds">
+    <div class="med-list" id="med-list">
+      <div class="empty"><div class="ico">💊</div><p>Sin medicamentos.<br>Toca <strong>+</strong> para agregar.</p></div>
+    </div>
+  </div>
+
+  <!-- TAB: Presión Arterial -->
+  <div class="tab-section" id="tab-pa">
+    <div class="pa-dashboard" id="pa-dashboard">
+      <div class="pa-card"><div class="pa-val" id="pa-avg-sis">—</div><div class="pa-lbl">Sistólica</div><div class="pa-unit">mmHg prom.</div></div>
+      <div class="pa-card"><div class="pa-val" id="pa-avg-dia">—</div><div class="pa-lbl">Diastólica</div><div class="pa-unit">mmHg prom.</div></div>
+      <div class="pa-card"><div class="pa-val" id="pa-avg-frec">—</div><div class="pa-lbl">Frecuencia</div><div class="pa-unit">lpm prom.</div></div>
+    </div>
+    <div class="pa-chart-wrap" id="pa-chart"></div>
+    <div class="pa-list" id="pa-list">
+      <div class="empty"><div class="ico">❤️</div><p>Sin registros.<br>Toca <strong>+</strong> para agregar.</p></div>
+    </div>
+    <div class="pa-ref">
+      🟢 Normal &lt;120/80 &nbsp;|&nbsp; 🟡 Elevada 120-129 &nbsp;|&nbsp; 🟠 HT1 130-139/80-89<br>
+      🔴 HT2 ≥140/90 &nbsp;|&nbsp; 🚨 Crisis &gt;180/120 &nbsp;|&nbsp; 🔵 Hipotensión &lt;90/60
+    </div>
+  </div>
+
+  <!-- TAB: Ajustes -->
+  <div class="tab-section" id="tab-settings">
+    <div class="settings-list">
+      <div class="settings-section">
+        <h3>Medicamentos</h3>
+        <button class="settings-btn" id="btn-export">📤 Exportar medicamentos</button>
+        <button class="settings-btn" id="btn-import-trigger">📥 Importar medicamentos</button>
+      </div>
+      <div class="settings-section">
+        <h3>Presión Arterial</h3>
+        <button class="settings-btn" id="btn-export-pa">📤 Exportar lecturas PA</button>
+      </div>
+      <div class="settings-section">
+        <h3>Cuenta</h3>
+        <button class="settings-btn" id="btn-cambiar-pass">🔑 Cambiar contraseña</button>
+        <button class="settings-btn danger" id="btn-logout">🚪 Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FABs -->
+  <button class="fab" id="fab-meds">+</button>
+  <button class="fab presion-fab" id="fab-pa" style="display:none">+</button>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="meds">
+      <span class="tab-ico">💊</span>Medicamentos
+    </button>
+    <button class="tab-btn" data-tab="pa">
+      <span class="tab-ico">❤️</span>Presión
+    </button>
+    <button class="tab-btn" data-tab="settings">
+      <span class="tab-ico">⚙️</span>Ajustes
+    </button>
+  </div>
+  <input type="file" id="import-file" accept=".json" style="display:none"/>
+</div>
+
+<!-- MODAL MEDICAMENTO -->
+<div class="modal-bg" id="modal-med">
+  <div class="modal">
+    <h2 id="modal-med-title">Agregar medicamento</h2>
+    <input type="hidden" id="med-id"/>
+    <label>Nombre del medicamento</label>
+    <input type="text" id="med-nombre" placeholder="Ej. Metformina"/>
+    <label>Stock actual</label>
+    <div style="display:flex;gap:8px">
+      <input type="number" id="med-stock"    placeholder="30"       min="0"   style="flex:2"/>
+      <input type="text"   id="med-unidades" placeholder="pastillas"          style="flex:1" list="sugerencias-unidades"/>
+      <datalist id="sugerencias-unidades">
+        <option value="pastillas"/><option value="gotas"/><option value="cápsulas"/>
+        <option value="comprimidos"/><option value="aplicaciones"/><option value="ml"/>
+        <option value="inhalaciones"/><option value="parches"/><option value="sobres"/>
+      </datalist>
+    </div>
+    <label>Consumo diario (unidades/día)</label>
+    <input type="number" id="med-consumo" placeholder="1" min="0.1" step="0.1"/>
+    <label class="check-row">
+      <input type="checkbox" id="med-variable"/>
+      <span>Consumo variable<span class="hint">Marca si la dosis no es fija. El promedio se calculará desde tu historial real.</span></span>
+    </label>
+    <label>Tomas por día</label>
+    <input type="number" id="med-tomas"  placeholder="1" min="1"/>
+    <label>Días de aviso antes de agotarse</label>
+    <input type="number" id="med-aviso"  placeholder="10" min="1"/>
+    <label>Fecha de inicio (opcional)</label>
+    <input type="date"   id="med-fecha"/>
+    <label>Días recetados (opcional)</label>
+    <input type="number" id="med-dias"   placeholder="30" min="1"/>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-cancel-med">Cancelar</button>
+      <button class="btn-save"   id="btn-save-med">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TOMAR / REABASTECER -->
+<div class="modal-bg" id="modal-accion">
+  <div class="modal">
+    <h2 id="accion-title">Tomar dosis</h2>
+    <input type="hidden" id="accion-med-id"/>
+    <input type="hidden" id="accion-tipo"/>
+    <label id="accion-label">Cantidad</label>
+    <input type="number" id="accion-cantidad" min="0.1" step="0.1"/>
+    <label id="accion-fecha-label">Fecha de consumo</label>
+    <input type="date" id="accion-fecha"/>
+    <label id="accion-momento-label">Momento del día</label>
+    <select id="accion-momento">
+      <option value="">Sin especificar</option>
+      <option value="Mañana">🌅 Mañana</option>
+      <option value="Tarde">☀️ Tarde</option>
+      <option value="Noche">🌙 Noche</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-cancel-accion">Cancelar</button>
+      <button class="btn-save"   id="btn-save-accion">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PRESIÓN ARTERIAL -->
+<div class="modal-bg" id="modal-pa">
+  <div class="modal">
+    <h2>❤️ Registrar lectura</h2>
+    <label>Fecha</label>
+    <input type="date" id="pa-fecha"/>
+    <label>Momento del día</label>
+    <select id="pa-momento">
+      <option value="">Sin especificar</option>
+      <option value="Mañana">🌅 Mañana</option>
+      <option value="Tarde">☀️ Tarde</option>
+      <option value="Noche">🌙 Noche</option>
+    </select>
+    <div class="pa-grid">
+      <div>
+        <label>Sistólica (mmHg)</label>
+        <input type="number" id="pa-sis" placeholder="120" min="50" max="300"/>
+      </div>
+      <div>
+        <label>Diastólica (mmHg)</label>
+        <input type="number" id="pa-dia" placeholder="80" min="30" max="200"/>
+      </div>
+      <div>
+        <label>Frecuencia (lpm)</label>
+        <input type="number" id="pa-frec" placeholder="70" min="30" max="220"/>
+      </div>
+    </div>
+    <label>Notas (opcional)</label>
+    <input type="text" id="pa-notas" placeholder="Después de ejercicio, con dolor…"/>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-cancel-pa">Cancelar</button>
+      <button class="btn-save-red" id="btn-save-pa">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CAMBIAR CONTRASEÑA -->
+<div class="modal-bg" id="modal-pass">
+  <div class="modal">
+    <h2>🔑 Cambiar contraseña</h2>
+    <label>Contraseña actual</label>
+    <input type="password" id="pass-actual"    placeholder="Contraseña actual"      autocomplete="current-password"/>
+    <label>Nueva contraseña</label>
+    <input type="password" id="pass-nueva"     placeholder="Nueva contraseña"       autocomplete="new-password"/>
+    <label>Confirmar contraseña</label>
+    <input type="password" id="pass-confirmar" placeholder="Repite la nueva"        autocomplete="new-password"/>
+    <div class="error" id="pass-error"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-cancel-pass">Cancelar</button>
+      <button class="btn-save"   id="btn-save-pass">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';
+const $ = id => document.getElementById(id);
+const token    = () => localStorage.getItem('med_token');
+const setToken = t  => localStorage.setItem('med_token', t);
+const setSyncBar = (msg, cls='') => {
+  const b = $('sync-bar'); b.textContent = msg; b.className = 'sync-bar ' + cls;
+};
+const fechaLocal = (d = new Date()) => {
+  const x = new Date(d);
+  x.setMinutes(x.getMinutes() - x.getTimezoneOffset());
+  return x.toISOString().slice(0, 10);
+};
+const fechaCorta = v => v ? new Date(v).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'2-digit' }) : '';
+const consumosTomados = m => (m.historial || []).filter(x => x.tipo === 'tomar').sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+
+/* ── Modo oscuro ── */
+function applyTheme(dark) {
+  document.body.classList.toggle('dark', dark);
+  $('btn-dark').textContent = dark ? '☀️' : '🌙';
+}
+applyTheme(localStorage.getItem('med_dark') === '1');
+$('btn-dark').onclick = () => {
+  const nowDark = !document.body.classList.contains('dark');
+  localStorage.setItem('med_dark', nowDark ? '1' : '0');
+  applyTheme(nowDark);
+};
+
+/* ── Tabs ── */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  $('tab-' + tab).classList.add('active');
+  document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
+  $('fab-meds').style.display = tab === 'meds' ? 'flex' : 'none';
+  $('fab-pa').style.display   = tab === 'pa'   ? 'flex' : 'none';
+  const titles = { meds:'💊 Medicamentos', pa:'❤️ Presión Arterial', settings:'⚙️ Ajustes' };
+  $('header-title').textContent = titles[tab];
+}
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = () => switchTab(btn.dataset.tab);
+});
+
+/* ── fetch wrapper ── */
+async function apiFetch(path, method='GET', body=null) {
+  const opts = { method, headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token()}` } };
+  if (body) opts.body = JSON.stringify(body);
+  let r;
+  try { r = await fetch(API + path, opts); }
+  catch { throw new Error('Sin conexión.'); }
+  const text = await r.text();
+  const type = r.headers.get('content-type') || '';
+  if (!type.includes('application/json')) throw new Error(`Error en ${path}`);
+  const data = text ? JSON.parse(text) : {};
+  if (!r.ok) throw new Error(data.error || 'Error');
+  return data;
+}
+
+/* ── Auth ── */
+let modoRegistro = false;
+$('btn-toggle').onclick = () => {
+  modoRegistro = !modoRegistro;
+  $('btn-login').textContent  = modoRegistro ? 'Registrarse' : 'Entrar';
+  $('btn-toggle').textContent = modoRegistro ? '¿Ya tienes cuenta? Entra' : '¿No tienes cuenta? Regístrate';
+  $('auth-error').textContent = '';
+};
+$('btn-login').onclick = async () => {
+  const email = $('auth-email').value.trim(), password = $('auth-pass').value;
+  if (!email || !password) { $('auth-error').textContent = 'Completa todos los campos'; return; }
+  try {
+    const res = await fetch(API + '/api/auth', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action: modoRegistro ? 'register' : 'login', email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    setToken(data.token);
+    localStorage.setItem('med_user', data.user.email);
+    iniciarApp();
+  } catch(e) { $('auth-error').textContent = e.message; }
+};
+
+/* ── App ── */
+let meds = [], lecturas = [];
+
+function iniciarApp() {
+  $('auth').style.display = 'none';
+  $('app').style.display  = 'block';
+  $('user-email').textContent = localStorage.getItem('med_user') || '';
+  switchTab('meds');
+  cargarTodo();
+}
+
+async function cargarTodo() {
+  setSyncBar('● Sincronizando…', 'spin');
+  try {
+    [meds, lecturas] = await Promise.all([
+      apiFetch('/api/medicamentos'),
+      apiFetch('/api/presion')
+    ]);
+    setSyncBar('● Sincronizado', 'ok');
+    renderMeds();
+    renderPA();
+  } catch(e) {
+    setSyncBar('● Error de conexión', 'err');
+  }
+}
+
+/* ── Cálculos medicamentos ── */
+function consumoPromedio(m) {
+  const tomas = consumosTomados(m);
+  if (m.consumo_variable) {
+    if (tomas.length < 2) return null;
+    const total = tomas.reduce((s,x) => s + (parseFloat(x.cantidad)||0), 0);
+    const fechas = tomas.map(x => new Date(x.fecha)).filter(x => !isNaN(x));
+    if (fechas.length < 2) return null;
+    const min = Math.min(...fechas.map(x=>x.getTime())), max = Math.max(...fechas.map(x=>x.getTime()));
+    return total / Math.max(1, Math.ceil((max-min)/86400000)+1);
+  }
+  return parseFloat(m.consumo_diario) || 0;
+}
+
+function diasRestantes(m) {
+  const c = consumoPromedio(m); return c ? Math.floor(m.stock/c) : null;
+}
+
+function resumenHistorial(m) {
+  const u = m.unidades||'pastillas';
+  const ult = consumosTomados(m).slice(0,3);
+  if (!m.consumo_variable || !ult.length) return '';
+  const txt = ult.map(x=>`${fechaCorta(x.fecha)}: ${x.cantidad} ${u}${x.momento?` (${x.momento})`:''}`).join(' · ');
+  return `<div class="history">Últimos consumos: ${txt}</div>`;
+}
+
+/* ── Render medicamentos ── */
+function renderMeds() {
+  const list = $('med-list');
+  if (!meds.length) {
+    list.innerHTML = '<div class="empty"><div class="ico">💊</div><p>Sin medicamentos.<br>Toca <strong>+</strong> para agregar.</p></div>'; return;
+  }
+  list.innerHTML = meds.map(m => {
+    const u=m.unidades||'pastillas', dias=diasRestantes(m), umbral=m.dias_aviso||10;
+    const consumo=consumoPromedio(m);
+    const pct=consumo?Math.min(100,(m.stock/(consumo*(m.dias_recetados||30)))*100):(m.stock>0?100:0);
+    const cls=dias===null?'':dias<=3?'danger':dias<=umbral?'warn':'';
+    const diasTxt=dias!==null?`${dias} días restantes`:m.consumo_variable?'sin datos aún':'—';
+    const alerta=cls==='danger'?' ⚠️':cls==='warn'?' 🔶':'';
+    const tag=m.consumo_variable?'<span class="tag">Variable</span>':'';
+    const consumoTxt=m.consumo_variable?(consumo?`Prom: ${consumo.toFixed(1)} ${u}/día`:'Prom: sin datos'):`${m.consumo_diario} ${u}/día`;
+    return `<div class="card-med">
+      <div class="nombre">${m.nombre}${tag}${alerta}</div>
+      <div class="info">Stock: <strong>${m.stock}</strong> ${u} · ${diasTxt} · ${consumoTxt}</div>
+      <div class="progress"><div class="progress-bar ${cls}" style="width:${pct}%"></div></div>
+      ${resumenHistorial(m)}
+      <div class="card-actions">
+        <button class="btn-sm btn-tomar"       onclick="abrirAccion(${m.id},'tomar')">Tomar</button>
+        <button class="btn-sm btn-reabastecer"  onclick="abrirAccion(${m.id},'reabastecer')">Reabastecer</button>
+        <button class="btn-sm btn-editar"       onclick="editarMed(${m.id})">Editar</button>
+        <button class="btn-sm btn-eliminar"     onclick="eliminarMed(${m.id})">Eliminar</button>
+      </div></div>`;
+  }).join('');
+}
+
+/* ── Render Presión Arterial ── */
+function catInfo(cat) {
+  const map = {
+    'Normal':              { cls:'normal', dot:'dot-normal' },
+    'Elevada':             { cls:'elevada', dot:'dot-elevada' },
+    'Hipertensión 1':      { cls:'ht1', dot:'dot-ht1' },
+    'Hipertensión 2':      { cls:'ht2', dot:'dot-ht2' },
+    'Crisis hipertensiva': { cls:'crisis', dot:'dot-crisis' },
+    'Hipotensión':         { cls:'hipo', dot:'dot-hipo' },
+  };
+  return map[cat] || { cls:'normal', dot:'dot-normal' };
+}
+
+function renderPA() {
+  // Dashboard promedios (últimos 30 días)
+  const hace30 = Date.now() - 30*24*3600*1000;
+  const recientes = lecturas.filter(l => new Date(l.fecha).getTime() >= hace30);
+  const avg = arr => arr.length ? Math.round(arr.reduce((s,v)=>s+v,0)/arr.length) : null;
+  const avgSis  = avg(recientes.map(l=>l.sistolica));
+  const avgDia  = avg(recientes.map(l=>l.diastolica));
+  const avgFrec = avg(recientes.filter(l=>l.frecuencia).map(l=>l.frecuencia));
+
+  $('pa-avg-sis').textContent  = avgSis  ?? '—';
+  $('pa-avg-dia').textContent  = avgDia  ?? '—';
+  $('pa-avg-frec').textContent = avgFrec ?? '—';
+
+  // Gráfica
+  renderChart();
+
+  // Color del card sistólica según promedio
+  if (avgSis && avgDia) {
+    const cat = categoriaPAjs(avgSis, avgDia);
+    const { cls } = catInfo(cat);
+    $('pa-avg-sis').className = 'pa-val cat-' + cls;
+    $('pa-avg-dia').className = 'pa-val cat-' + cls;
+  }
+
+  // Lista
+  const list = $('pa-list');
+  if (!lecturas.length) {
+    list.innerHTML = '<div class="empty"><div class="ico">❤️</div><p>Sin registros.<br>Toca <strong>+</strong> para agregar.</p></div>'; return;
+  }
+  list.innerHTML = lecturas.map(l => {
+    const { cls, dot } = catInfo(l.categoria);
+    const momentoTxt = l.momento ? `${l.momento} · ` : '';
+    const frecTxt = l.frecuencia ? ` · ${l.frecuencia} lpm` : '';
+    return `<div class="pa-row">
+      <div class="pa-cat-dot ${dot}"></div>
+      <div class="pa-row-body">
+        <div class="pa-row-top">
+          <span class="pa-vals">${l.sistolica}/${l.diastolica} <span>mmHg${frecTxt}</span></span>
+          <button class="pa-del" onclick="eliminarPA(${l.id})">×</button>
+        </div>
+        <div class="pa-meta">${fechaCorta(l.fecha)} · ${momentoTxt}<span class="pa-cat-txt cat-${cls}">${l.categoria}</span></div>
+        ${l.notas ? `<div class="pa-notas">${l.notas}</div>` : ''}
+      </div></div>`;
+  }).join('');
+}
+
+/* ── Gráfica SVG de tendencia ── */
+function renderChart() {
+  const container = $('pa-chart');
+  if (!lecturas.length) { container.innerHTML = ''; return; }
+
+  // Ordenar por fecha asc, últimas 20
+  const data = [...lecturas]
+    .sort((a,b) => new Date(a.fecha) - new Date(b.fecha))
+    .slice(-20);
+  if (data.length < 2) { container.innerHTML = ''; return; }
+
+  const W = container.clientWidth || 320;
+  const H = 170;
+  const padL = 36, padR = 10, padT = 12, padB = 28;
+  const cw = W - padL - padR;
+  const ch = H - padT - padB;
+
+  const allVals = [...data.map(d=>d.sistolica), ...data.map(d=>d.diastolica)];
+  const yRaw = Math.min(...allVals);
+  const yMin = Math.max(40, yRaw - 10);
+  const yMax = Math.min(230, Math.max(...allVals) + 15);
+
+  const xS = i => padL + (i / (data.length - 1)) * cw;
+  const yS = v => padT + ch - ((v - yMin) / (yMax - yMin)) * ch;
+
+  // Líneas de referencia
+  const refs = [
+    {v:140, c:'#c0392b', l:'140'},
+    {v:120, c:'#e67e22', l:'120'},
+    {v:90,  c:'#e67e22', l:'90'},
+    {v:80,  c:'#27ae60', l:'80'},
+  ].filter(r => r.v > yMin && r.v < yMax);
+
+  const refLines = refs.map(r =>
+    `<line x1="${padL}" y1="${yS(r.v).toFixed(1)}" x2="${padL+cw}" y2="${yS(r.v).toFixed(1)}" stroke="${r.c}" stroke-width="1" stroke-dasharray="4,3" opacity=".5"/>
+     <text x="${padL-3}" y="${(yS(r.v)+4).toFixed(1)}" text-anchor="end" font-size="9" fill="${r.c}">${r.l}</text>`
+  ).join('');
+
+  const line = (arr, color) => {
+    const pts = arr.map((v,i) => `${xS(i).toFixed(1)},${yS(v).toFixed(1)}`).join(' ');
+    return `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity=".9"/>`;
+  };
+  const circles = (arr, color) => arr.map((v,i) =>
+    `<circle cx="${xS(i).toFixed(1)}" cy="${yS(v).toFixed(1)}" r="3.5" fill="${color}" stroke="var(--surface)" stroke-width="1.5"/>`
+  ).join('');
+
+  // Etiquetas X (máx 7)
+  const step = Math.ceil(data.length / 7);
+  const xLabels = data.map((d,i) => {
+    if (i % step !== 0 && i !== data.length-1) return '';
+    const f = new Date(d.fecha);
+    const lbl = f.toLocaleDateString('es-MX', {day:'2-digit', month:'short'});
+    return `<text x="${xS(i).toFixed(1)}" y="${H-6}" text-anchor="middle" font-size="9" fill="var(--sub)">${lbl}</text>`;
+  }).join('');
+
+  container.innerHTML =
+    `<div class="pa-chart-label">📈 Tendencia — últimas ${data.length} lecturas</div>
+     <svg width="${W}" height="${H}" style="display:block;overflow:visible">
+       ${refLines}
+       ${line(data.map(d=>d.sistolica), '#e74c3c')}
+       ${line(data.map(d=>d.diastolica), '#2980b9')}
+       ${circles(data.map(d=>d.sistolica), '#e74c3c')}
+       ${circles(data.map(d=>d.diastolica), '#2980b9')}
+       ${xLabels}
+     </svg>
+     <div class="pa-chart-legend">
+       <span><span style="background:#e74c3c"></span>Sistólica</span>
+       <span><span style="background:#2980b9"></span>Diastólica</span>
+     </div>`;
+}
+
+function categoriaPAjs(sis, dia) {
+  if (sis > 180 || dia > 120) return 'Crisis hipertensiva';
+  if (sis >= 140 || dia >= 90) return 'Hipertensión 2';
+  if (sis >= 130 || dia >= 80) return 'Hipertensión 1';
+  if (sis >= 120 && dia < 80)  return 'Elevada';
+  if (sis < 90  || dia < 60)  return 'Hipotensión';
+  return 'Normal';
+}
+
+/* ── FAB / Modal medicamentos ── */
+$('fab-meds').onclick = () => {
+  $('modal-med-title').textContent = 'Agregar medicamento';
+  ['med-id','med-nombre','med-stock','med-consumo','med-tomas','med-aviso','med-fecha','med-dias'].forEach(id=>$(id).value='');
+  $('med-unidades').value = 'pastillas';
+  $('med-variable').checked = false;
+  $('modal-med').classList.add('open');
+};
+$('btn-cancel-med').onclick = () => $('modal-med').classList.remove('open');
+
+function editarMed(id) {
+  const m = meds.find(x=>x.id===id); if(!m) return;
+  $('modal-med-title').textContent = 'Editar medicamento';
+  $('med-id').value        = m.id;
+  $('med-nombre').value    = m.nombre;
+  $('med-stock').value     = m.stock;
+  $('med-unidades').value  = m.unidades||'pastillas';
+  $('med-consumo').value   = m.consumo_diario;
+  $('med-variable').checked= !!m.consumo_variable;
+  $('med-tomas').value     = m.tomas;
+  $('med-aviso').value     = m.dias_aviso;
+  $('med-fecha').value     = m.fecha_inicio||'';
+  $('med-dias').value      = m.dias_recetados||'';
+  $('modal-med').classList.add('open');
+}
+
+$('btn-save-med').onclick = async () => {
+  const id = $('med-id').value;
+  const payload = {
+    nombre:           $('med-nombre').value.trim(),
+    stock:            parseFloat($('med-stock').value)||0,
+    unidades:         $('med-unidades').value.trim()||'pastillas',
+    consumo_diario:   parseFloat($('med-consumo').value)||1,
+    consumo_variable: $('med-variable').checked,
+    tomas:            parseInt($('med-tomas').value)||1,
+    dias_aviso:       parseInt($('med-aviso').value)||10,
+    fecha_inicio:     $('med-fecha').value||null,
+    dias_recetados:   parseInt($('med-dias').value)||null,
+  };
+  if (!payload.nombre) { alert('El nombre es obligatorio'); return; }
+  try {
+    if (id) await apiFetch('/api/medicamentos','PATCH',{id:parseInt(id),...payload});
+    else    await apiFetch('/api/medicamentos','POST',payload);
+    $('modal-med').classList.remove('open');
+    cargarTodo();
+  } catch(e) { alert(e.message); }
+};
+
+/* ── Modal tomar/reabastecer ── */
+function abrirAccion(id, tipo) {
+  const m = meds.find(x=>x.id===id);
+  $('accion-med-id').value = id; $('accion-tipo').value = tipo;
+  const esTomar = tipo==='tomar';
+  $('accion-title').textContent       = esTomar?`Tomar — ${m.nombre}`:`Reabastecer — ${m.nombre}`;
+  $('accion-label').textContent       = esTomar?`Cantidad (${m.unidades||'pastillas'})`:`Añadir (${m.unidades||'pastillas'})`;
+  $('accion-fecha-label').textContent = esTomar?'Fecha de consumo':'Fecha de reabastecimiento';
+  $('accion-momento-label').style.display = esTomar?'':'none';
+  $('accion-momento').style.display       = esTomar?'':'none';
+  $('accion-momento').value = '';
+  $('accion-cantidad').value = esTomar?(m.consumo_variable?'': (m.tomas||1)):30;
+  $('accion-fecha').value = fechaLocal();
+  $('modal-accion').classList.add('open');
+}
+$('btn-cancel-accion').onclick = () => $('modal-accion').classList.remove('open');
+$('btn-save-accion').onclick = async () => {
+  const id=parseInt($('accion-med-id').value), tipo=$('accion-tipo').value;
+  const cant=parseFloat($('accion-cantidad').value);
+  if (!cant||cant<=0) { alert('Ingresa una cantidad válida'); return; }
+  const m=meds.find(x=>x.id===id); if(!m) return;
+  const nuevoStock = tipo==='tomar'?Math.max(0,m.stock-cant):m.stock+cant;
+  const fecha=$('accion-fecha').value||fechaLocal(), momento=$('accion-momento').value||'';
+  const entrada={fecha:`${fecha}T12:00:00.000Z`,tipo,cantidad:cant,...(momento&&{momento})};
+  const hist=[...(m.historial||[]),entrada];
+  try {
+    await apiFetch('/api/medicamentos','PATCH',{id,stock:nuevoStock,historial:hist});
+    $('modal-accion').classList.remove('open');
+    if (tipo==='tomar'&&nuevoStock<=0) alert(`⚠️ ¡${m.nombre} se agotó!`);
+    cargarTodo();
+  } catch(e) { alert(e.message); }
+};
+
+async function eliminarMed(id) {
+  const m=meds.find(x=>x.id===id);
+  if (!confirm(`¿Eliminar ${m?.nombre}?`)) return;
+  try { await apiFetch('/api/medicamentos','DELETE',{id}); cargarTodo(); }
+  catch(e) { alert(e.message); }
+}
+
+/* ── Modal Presión Arterial ── */
+$('fab-pa').onclick = () => {
+  ['pa-sis','pa-dia','pa-frec','pa-notas'].forEach(id=>$(id).value='');
+  $('pa-fecha').value   = fechaLocal();
+  $('pa-momento').value = '';
+  $('modal-pa').classList.add('open');
+};
+$('btn-cancel-pa').onclick = () => $('modal-pa').classList.remove('open');
+$('btn-save-pa').onclick = async () => {
+  const sis=parseInt($('pa-sis').value), dia=parseInt($('pa-dia').value);
+  if (!sis||!dia||sis<50||dia<30) { alert('Ingresa valores válidos de sistólica y diastólica'); return; }
+  try {
+    await apiFetch('/api/presion','POST',{
+      fecha:    $('pa-fecha').value||fechaLocal(),
+      momento:  $('pa-momento').value||'',
+      sistolica: sis, diastolica: dia,
+      frecuencia: parseInt($('pa-frec').value)||null,
+      notas:     $('pa-notas').value||'',
+    });
+    $('modal-pa').classList.remove('open');
+    cargarTodo();
+  } catch(e) { alert(e.message); }
+};
+
+async function eliminarPA(id) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  try { await apiFetch('/api/presion','DELETE',{id}); cargarTodo(); }
+  catch(e) { alert(e.message); }
+}
+
+/* ── Cambiar contraseña ── */
+$('btn-cambiar-pass').onclick = () => {
+  $('pass-actual').value=$('pass-nueva').value=$('pass-confirmar').value='';
+  $('pass-error').textContent='';
+  $('modal-pass').classList.add('open');
+};
+$('btn-cancel-pass').onclick = () => $('modal-pass').classList.remove('open');
+$('btn-save-pass').onclick = async () => {
+  const actual=$('pass-actual').value, nueva=$('pass-nueva').value, conf=$('pass-confirmar').value;
+  $('pass-error').textContent='';
+  if (!actual||!nueva||!conf){$('pass-error').textContent='Completa todos los campos';return;}
+  if (nueva!==conf){$('pass-error').textContent='Las contraseñas no coinciden';return;}
+  if (nueva.length<4){$('pass-error').textContent='Mínimo 4 caracteres';return;}
+  try {
+    await apiFetch('/api/auth','POST',{action:'change-password',password:actual,new_password:nueva});
+    $('modal-pass').classList.remove('open');
+    alert('✅ Contraseña cambiada');
+  } catch(e){$('pass-error').textContent=e.message;}
+};
+
+/* ── Logout ── */
+$('btn-logout').onclick = () => {
+  localStorage.removeItem('med_token'); localStorage.removeItem('med_user');
+  $('app').style.display='none'; $('auth').style.display='flex';
+  $('auth-email').value=$('auth-pass').value='';
+};
+
+/* ── Exportar / Importar ── */
+$('btn-export').onclick = () => {
+  const blob=new Blob([JSON.stringify(meds,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`medicamentos-${new Date().toISOString().slice(0,10)}.json`; a.click();
+};
+$('btn-export-pa').onclick = () => {
+  // Exportar como CSV
+  const header='Fecha,Momento,Sistólica,Diastólica,Frecuencia,Categoría,Notas\n';
+  const rows=lecturas.map(l=>[l.fecha,l.momento||'',l.sistolica,l.diastolica,l.frecuencia||'',l.categoria,l.notas||''].join(',')).join('\n');
+  const blob=new Blob([header+rows],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`presion-arterial-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+};
+$('btn-import-trigger').onclick = () => $('import-file').click();
+$('import-file').onchange = async e => {
+  const file=e.target.files[0]; if(!file) return;
+  try {
+    const data=JSON.parse(await file.text());
+    if (!Array.isArray(data)) throw new Error('Formato inválido');
+    for (const m of data) {
+      const {id,user_id,created_at,...campos}=m;
+      await apiFetch('/api/medicamentos','POST',campos);
+    }
+    alert('Importación completada'); cargarTodo();
+  } catch(e) { alert('Error al importar: '+e.message); }
+  e.target.value='';
+};
+
+/* ── Inicio ── */
+if (token()) iniciarApp();
+else $('auth').style.display='flex';
+</script>
+</body>
+</html>
