@@ -12,7 +12,7 @@ function categoriaPA(sis, dia) {
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
@@ -34,6 +34,7 @@ export default async function handler(req, res) {
         notas      TEXT,
         created_at TIMESTAMPTZ DEFAULT NOW()
       )`;
+    await sql`ALTER TABLE presion_arterial ADD COLUMN IF NOT EXISTS hora TIME`;
 
     const auth  = req.headers.authorization?.replace('Bearer ', '');
     const claim = verifyToken(auth || '');
@@ -49,16 +50,33 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const { fecha, momento, sistolica, diastolica, frecuencia, notas } = req.body;
+      const { fecha, momento, hora, sistolica, diastolica, frecuencia, notas } = req.body;
       if (!fecha || !sistolica || !diastolica)
         return res.status(400).json({ error: 'Faltan campos obligatorios' });
       const categoria = categoriaPA(parseInt(sistolica), parseInt(diastolica));
       const [row] = await sql`
-        INSERT INTO presion_arterial (user_id, fecha, momento, sistolica, diastolica, frecuencia, categoria, notas)
-        VALUES (${userId}, ${fecha}, ${momento || null}, ${parseInt(sistolica)}, ${parseInt(diastolica)},
+        INSERT INTO presion_arterial (user_id, fecha, momento, hora, sistolica, diastolica, frecuencia, categoria, notas)
+        VALUES (${userId}, ${fecha}, ${momento || null}, ${hora || null}, ${parseInt(sistolica)}, ${parseInt(diastolica)},
                 ${frecuencia ? parseInt(frecuencia) : null}, ${categoria}, ${notas || null})
         RETURNING *`;
       return res.status(201).json(row);
+    }
+
+    if (req.method === 'PUT') {
+      const { id, fecha, momento, hora, sistolica, diastolica, frecuencia, notas } = req.body;
+      if (!id || !fecha || !sistolica || !diastolica)
+        return res.status(400).json({ error: 'Faltan campos obligatorios' });
+      const categoria = categoriaPA(parseInt(sistolica), parseInt(diastolica));
+      const [row] = await sql`
+        UPDATE presion_arterial
+        SET fecha = ${fecha}, momento = ${momento || null}, hora = ${hora || null},
+            sistolica = ${parseInt(sistolica)}, diastolica = ${parseInt(diastolica)},
+            frecuencia = ${frecuencia ? parseInt(frecuencia) : null},
+            categoria = ${categoria}, notas = ${notas || null}
+        WHERE id = ${id} AND user_id = ${userId}
+        RETURNING *`;
+      if (!row) return res.status(404).json({ error: 'Registro no encontrado' });
+      return res.status(200).json(row);
     }
 
     if (req.method === 'DELETE') {
