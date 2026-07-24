@@ -92,7 +92,7 @@ body.dark .tag{background:#1c3a5c}
 .pa-card .pa-lbl{font-size:10px;color:var(--sub);margin-top:3px}
 .pa-card .pa-unit{font-size:10px;color:var(--sub)}
 .pa-list{padding:8px 14px 12px}
-.pa-row{background:var(--surface);border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:var(--card-shadow);display:flex;align-items:flex-start;gap:10px}
+.pa-row{background:var(--surface);border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:var(--card-shadow);display:flex;align-items:flex-start;gap:10px;cursor:pointer}
 .pa-cat-dot{width:10px;height:10px;border-radius:50%;flex:0 0 10px;margin-top:5px}
 .pa-row-body{flex:1;min-width:0}
 .pa-row-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
@@ -141,6 +141,7 @@ body.dark .tag{background:#1c3a5c}
 
 /* ── Número grande PA ── */
 .pa-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px}
+.pa-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
 </style>
 </head>
 <body>
@@ -300,9 +301,17 @@ body.dark .tag{background:#1c3a5c}
 <!-- MODAL PRESIÓN ARTERIAL -->
 <div class="modal-bg" id="modal-pa">
   <div class="modal">
-    <h2>❤️ Registrar lectura</h2>
-    <label>Fecha</label>
-    <input type="date" id="pa-fecha"/>
+    <h2 id="modal-pa-titulo">❤️ Registrar lectura</h2>
+    <div class="pa-grid-2">
+      <div>
+        <label>Fecha</label>
+        <input type="date" id="pa-fecha"/>
+      </div>
+      <div>
+        <label>Hora</label>
+        <input type="time" id="pa-hora"/>
+      </div>
+    </div>
     <label>Momento del día</label>
     <select id="pa-momento">
       <option value="">Sin especificar</option>
@@ -364,7 +373,15 @@ const fechaLocal = (d = new Date()) => {
   x.setMinutes(x.getMinutes() - x.getTimezoneOffset());
   return x.toISOString().slice(0, 10);
 };
-const fechaCorta = v => v ? new Date(v).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'2-digit' }) : '';
+// Parsea 'YYYY-MM-DD' como medianoche LOCAL (evita el corrimiento de -1 día
+// que produce `new Date('YYYY-MM-DD')`, que JS interpreta como UTC).
+const parseFechaLocal = v => {
+  if (!v) return new Date(NaN);
+  const [y, m, d] = String(v).slice(0, 10).split('-').map(Number);
+  return new Date(y, (m || 1) - 1, d || 1);
+};
+const fechaCorta = v => v ? parseFechaLocal(v).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'2-digit' }) : '';
+const horaCorta = v => v ? String(v).slice(0,5) : '';
 const consumosTomados = m => (m.historial || []).filter(x => x.tipo === 'tomar').sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
 
 /* ── Modo oscuro ── */
@@ -530,7 +547,7 @@ function catInfo(cat) {
 function renderPA() {
   // Dashboard promedios (últimos 30 días)
   const hace30 = Date.now() - 30*24*3600*1000;
-  const recientes = lecturas.filter(l => new Date(l.fecha).getTime() >= hace30);
+  const recientes = lecturas.filter(l => parseFechaLocal(l.fecha).getTime() >= hace30);
   const avg = arr => arr.length ? Math.round(arr.reduce((s,v)=>s+v,0)/arr.length) : null;
   const avgSis  = avg(recientes.map(l=>l.sistolica));
   const avgDia  = avg(recientes.map(l=>l.diastolica));
@@ -559,15 +576,16 @@ function renderPA() {
   list.innerHTML = lecturas.map(l => {
     const { cls, dot } = catInfo(l.categoria);
     const momentoTxt = l.momento ? `${l.momento} · ` : '';
+    const horaTxt = l.hora ? `${horaCorta(l.hora)} · ` : '';
     const frecTxt = l.frecuencia ? ` · ${l.frecuencia} lpm` : '';
-    return `<div class="pa-row">
+    return `<div class="pa-row" onclick="editarPA(${l.id})">
       <div class="pa-cat-dot ${dot}"></div>
       <div class="pa-row-body">
         <div class="pa-row-top">
           <span class="pa-vals">${l.sistolica}/${l.diastolica} <span>mmHg${frecTxt}</span></span>
-          <button class="pa-del" onclick="eliminarPA(${l.id})">×</button>
+          <button class="pa-del" onclick="event.stopPropagation();eliminarPA(${l.id})">×</button>
         </div>
-        <div class="pa-meta">${fechaCorta(l.fecha)} · ${momentoTxt}<span class="pa-cat-txt cat-${cls}">${l.categoria}</span></div>
+        <div class="pa-meta">${fechaCorta(l.fecha)} · ${horaTxt}${momentoTxt}<span class="pa-cat-txt cat-${cls}">${l.categoria}</span></div>
         ${l.notas ? `<div class="pa-notas">${l.notas}</div>` : ''}
       </div></div>`;
   }).join('');
@@ -580,7 +598,7 @@ function renderChart() {
 
   // Ordenar por fecha asc, últimas 20
   const data = [...lecturas]
-    .sort((a,b) => new Date(a.fecha) - new Date(b.fecha))
+    .sort((a,b) => parseFechaLocal(a.fecha) - parseFechaLocal(b.fecha) || (a.hora||'').localeCompare(b.hora||''))
     .slice(-20);
   if (data.length < 2) { container.innerHTML = ''; return; }
 
@@ -623,7 +641,7 @@ function renderChart() {
   const step = Math.ceil(data.length / 7);
   const xLabels = data.map((d,i) => {
     if (i % step !== 0 && i !== data.length-1) return '';
-    const f = new Date(d.fecha);
+    const f = parseFechaLocal(d.fecha);
     const lbl = f.toLocaleDateString('es-MX', {day:'2-digit', month:'short'});
     return `<text x="${xS(i).toFixed(1)}" y="${H-6}" text-anchor="middle" font-size="9" fill="var(--sub)">${lbl}</text>`;
   }).join('');
@@ -742,25 +760,56 @@ async function eliminarMed(id) {
 }
 
 /* ── Modal Presión Arterial ── */
+const horaLocal = (d = new Date()) => String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+let paEditId = null; // null = registro nuevo; con valor = editando ese id
+
 $('fab-pa').onclick = () => {
+  paEditId = null;
+  $('modal-pa-titulo').textContent = '❤️ Registrar lectura';
+  $('btn-save-pa').textContent = 'Guardar';
   ['pa-sis','pa-dia','pa-frec','pa-notas'].forEach(id=>$(id).value='');
   $('pa-fecha').value   = fechaLocal();
+  $('pa-hora').value    = horaLocal();
   $('pa-momento').value = '';
   $('modal-pa').classList.add('open');
 };
-$('btn-cancel-pa').onclick = () => $('modal-pa').classList.remove('open');
+
+function editarPA(id) {
+  const l = lecturas.find(x => x.id === id);
+  if (!l) return;
+  paEditId = id;
+  $('modal-pa-titulo').textContent = '❤️ Editar lectura';
+  $('btn-save-pa').textContent = 'Guardar cambios';
+  $('pa-fecha').value   = (l.fecha || '').slice(0,10) || fechaLocal();
+  $('pa-hora').value    = l.hora ? l.hora.slice(0,5) : '';
+  $('pa-momento').value = l.momento || '';
+  $('pa-sis').value     = l.sistolica ?? '';
+  $('pa-dia').value     = l.diastolica ?? '';
+  $('pa-frec').value    = l.frecuencia ?? '';
+  $('pa-notas').value   = l.notas || '';
+  $('modal-pa').classList.add('open');
+}
+
+$('btn-cancel-pa').onclick = () => { $('modal-pa').classList.remove('open'); paEditId = null; };
 $('btn-save-pa').onclick = async () => {
   const sis=parseInt($('pa-sis').value), dia=parseInt($('pa-dia').value);
   if (!sis||!dia||sis<50||dia<30) { alert('Ingresa valores válidos de sistólica y diastólica'); return; }
+  const payload = {
+    fecha:      $('pa-fecha').value||fechaLocal(),
+    momento:    $('pa-momento').value||'',
+    hora:       $('pa-hora').value||'',
+    sistolica: sis, diastolica: dia,
+    frecuencia: parseInt($('pa-frec').value)||null,
+    notas:     $('pa-notas').value||'',
+  };
   try {
-    await apiFetch('/api/presion','POST',{
-      fecha:    $('pa-fecha').value||fechaLocal(),
-      momento:  $('pa-momento').value||'',
-      sistolica: sis, diastolica: dia,
-      frecuencia: parseInt($('pa-frec').value)||null,
-      notas:     $('pa-notas').value||'',
-    });
+    if (paEditId) {
+      await apiFetch('/api/presion','PUT',{ id: paEditId, ...payload });
+    } else {
+      await apiFetch('/api/presion','POST', payload);
+    }
     $('modal-pa').classList.remove('open');
+    paEditId = null;
     cargarTodo();
   } catch(e) { alert(e.message); }
 };
@@ -806,8 +855,8 @@ $('btn-export').onclick = () => {
 };
 $('btn-export-pa').onclick = () => {
   // Exportar como CSV
-  const header='Fecha,Momento,Sistólica,Diastólica,Frecuencia,Categoría,Notas\n';
-  const rows=lecturas.map(l=>[l.fecha,l.momento||'',l.sistolica,l.diastolica,l.frecuencia||'',l.categoria,l.notas||''].join(',')).join('\n');
+  const header='Fecha,Hora,Momento,Sistólica,Diastólica,Frecuencia,Categoría,Notas\n';
+  const rows=lecturas.map(l=>[(l.fecha||'').slice(0,10),horaCorta(l.hora),l.momento||'',l.sistolica,l.diastolica,l.frecuencia||'',l.categoria,l.notas||''].join(',')).join('\n');
   const blob=new Blob([header+rows],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=`presion-arterial-${new Date().toISOString().slice(0,10)}.csv`; a.click();
