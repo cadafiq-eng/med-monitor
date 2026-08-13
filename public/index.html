@@ -80,8 +80,18 @@ header{background:var(--header-bg);padding:12px 20px;position:sticky;top:0;z-ind
 .btn-tomar{background:#007AFF;color:#fff}
 .btn-reabastecer{background:#34c759;color:#fff}
 .btn-editar{background:var(--bg);color:var(--text)}
+.btn-historial{background:var(--bg);color:var(--text)}
 .btn-eliminar{background:#ff3b30;color:#fff}
 .history{font-size:11px;color:var(--sub);margin-top:-4px;margin-bottom:8px;line-height:1.4}
+.hist-row{background:var(--bg);border-radius:10px;padding:9px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.hist-row-body{flex:1;min-width:0}
+.hist-row-top{font-size:13px;font-weight:600}
+.hist-tomar{color:#007AFF}
+.hist-reabastecer{color:#34c759}
+.hist-meta{font-size:11px;color:var(--sub);margin-top:2px}
+.hist-row-actions{display:flex;gap:4px}
+.hist-edit,.hist-del{border:none;border-radius:8px;width:28px;height:28px;font-size:14px;cursor:pointer;background:var(--surface)}
+.hist-del{color:#ff3b30}
 .tag{display:inline-block;background:#e8f1ff;color:#007AFF;border-radius:5px;padding:1px 5px;font-size:10px;font-weight:700;margin-left:5px}
 body.dark .tag{background:#1c3a5c}
 
@@ -294,6 +304,18 @@ body.dark .tag{background:#1c3a5c}
     <div class="modal-actions">
       <button class="btn-cancel" id="btn-cancel-accion">Cancelar</button>
       <button class="btn-save"   id="btn-save-accion">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HISTORIAL DE MEDICAMENTO -->
+<div class="modal-bg" id="modal-historial">
+  <div class="modal">
+    <h2>📋 Historial — <span id="historial-med-nombre"></span></h2>
+    <input type="hidden" id="historial-med-id"/>
+    <div id="historial-list"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-cerrar-historial">Cerrar</button>
     </div>
   </div>
 </div>
@@ -525,6 +547,7 @@ function renderMeds() {
       <div class="card-actions">
         <button class="btn-sm btn-tomar"       onclick="abrirAccion(${m.id},'tomar')">Tomar</button>
         <button class="btn-sm btn-reabastecer"  onclick="abrirAccion(${m.id},'reabastecer')">Reabastecer</button>
+        <button class="btn-sm btn-historial"    onclick="verHistorial(${m.id})">Historial</button>
         <button class="btn-sm btn-editar"       onclick="editarMed(${m.id})">Editar</button>
         <button class="btn-sm btn-eliminar"     onclick="eliminarMed(${m.id})">Eliminar</button>
       </div></div>`;
@@ -720,7 +743,11 @@ $('btn-save-med').onclick = async () => {
 };
 
 /* ── Modal tomar/reabastecer ── */
+let accionEditIdx = null; // null = nueva captura; número = editando ese índice de m.historial
+
 function abrirAccion(id, tipo) {
+  accionEditIdx = null;
+  $('btn-save-accion').textContent = 'Confirmar';
   const m = meds.find(x=>x.id===id);
   $('accion-med-id').value = id; $('accion-tipo').value = tipo;
   const esTomar = tipo==='tomar';
@@ -734,23 +761,95 @@ function abrirAccion(id, tipo) {
   $('accion-fecha').value = fechaLocal();
   $('modal-accion').classList.add('open');
 }
-$('btn-cancel-accion').onclick = () => $('modal-accion').classList.remove('open');
+$('btn-cancel-accion').onclick = () => { $('modal-accion').classList.remove('open'); accionEditIdx = null; };
 $('btn-save-accion').onclick = async () => {
   const id=parseInt($('accion-med-id').value), tipo=$('accion-tipo').value;
   const cant=parseFloat($('accion-cantidad').value);
   if (!cant||cant<=0) { alert('Ingresa una cantidad válida'); return; }
   const m=meds.find(x=>x.id===id); if(!m) return;
-  const nuevoStock = tipo==='tomar'?Math.max(0,m.stock-cant):m.stock+cant;
   const fecha=$('accion-fecha').value||fechaLocal(), momento=$('accion-momento').value||'';
-  const entrada={fecha:`${fecha}T12:00:00.000Z`,tipo,cantidad:cant,...(momento&&{momento})};
-  const hist=[...(m.historial||[]),entrada];
+  const hist=[...(m.historial||[])];
+  let nuevoStock;
+
+  if (accionEditIdx !== null && hist[accionEditIdx]) {
+    // Edición: se revierte el efecto de la cantidad anterior y se aplica la nueva
+    const anterior = hist[accionEditIdx];
+    const stockSinAnterior = anterior.tipo==='tomar' ? m.stock + anterior.cantidad : m.stock - anterior.cantidad;
+    nuevoStock = tipo==='tomar' ? Math.max(0, stockSinAnterior - cant) : stockSinAnterior + cant;
+    hist[accionEditIdx] = { fecha:`${fecha}T12:00:00.000Z`, tipo, cantidad:cant, ...(momento&&{momento}) };
+  } else {
+    nuevoStock = tipo==='tomar' ? Math.max(0, m.stock - cant) : m.stock + cant;
+    hist.push({ fecha:`${fecha}T12:00:00.000Z`, tipo, cantidad:cant, ...(momento&&{momento}) });
+  }
+
   try {
     await apiFetch('/api/medicamentos','PATCH',{id,stock:nuevoStock,historial:hist});
     $('modal-accion').classList.remove('open');
+    accionEditIdx = null;
     if (tipo==='tomar'&&nuevoStock<=0) alert(`⚠️ ¡${m.nombre} se agotó!`);
     cargarTodo();
   } catch(e) { alert(e.message); }
 };
+
+/* ── Modal Historial (editar/eliminar registros individuales) ── */
+function verHistorial(id) {
+  const m = meds.find(x=>x.id===id); if(!m) return;
+  $('historial-med-nombre').textContent = m.nombre;
+  $('historial-med-id').value = id;
+  const u = m.unidades||'pastillas';
+  const entradas = (m.historial||[]).map((e,idx)=>({...e,_idx:idx}))
+    .sort((a,b)=> new Date(b.fecha) - new Date(a.fecha));
+  const list = $('historial-list');
+  list.innerHTML = entradas.length ? entradas.map(e => {
+    const esTomar = e.tipo==='tomar';
+    const tipoTxt = esTomar?'Tomó':'Reabasteció';
+    const signo    = esTomar?'−':'+';
+    const cls      = esTomar?'hist-tomar':'hist-reabastecer';
+    return `<div class="hist-row">
+      <div class="hist-row-body">
+        <div class="hist-row-top ${cls}">${tipoTxt} ${signo}${e.cantidad} ${u}</div>
+        <div class="hist-meta">${fechaCorta(e.fecha)}${e.momento?` · ${e.momento}`:''}</div>
+      </div>
+      <div class="hist-row-actions">
+        <button class="hist-edit" onclick="editarConsumo(${id},${e._idx})" title="Editar">✎</button>
+        <button class="hist-del"  onclick="eliminarConsumo(${id},${e._idx})" title="Eliminar">×</button>
+      </div></div>`;
+  }).join('') : '<div class="empty"><p>Sin registros aún.</p></div>';
+  $('modal-historial').classList.add('open');
+}
+$('btn-cerrar-historial').onclick = () => $('modal-historial').classList.remove('open');
+
+function editarConsumo(medId, idx) {
+  const m = meds.find(x=>x.id===medId); if(!m) return;
+  const e = (m.historial||[])[idx]; if(!e) return;
+  accionEditIdx = idx;
+  const esTomar = e.tipo==='tomar';
+  $('accion-med-id').value = medId; $('accion-tipo').value = e.tipo;
+  $('accion-title').textContent       = esTomar?`Editar toma — ${m.nombre}`:`Editar reabastecimiento — ${m.nombre}`;
+  $('accion-label').textContent       = esTomar?`Cantidad (${m.unidades||'pastillas'})`:`Añadir (${m.unidades||'pastillas'})`;
+  $('accion-fecha-label').textContent = esTomar?'Fecha de consumo':'Fecha de reabastecimiento';
+  $('accion-momento-label').style.display = esTomar?'':'none';
+  $('accion-momento').style.display       = esTomar?'':'none';
+  $('accion-momento').value  = e.momento||'';
+  $('accion-cantidad').value = e.cantidad;
+  $('accion-fecha').value    = (e.fecha||'').slice(0,10);
+  $('btn-save-accion').textContent = 'Guardar cambios';
+  $('modal-historial').classList.remove('open');
+  $('modal-accion').classList.add('open');
+}
+
+async function eliminarConsumo(medId, idx) {
+  const m = meds.find(x=>x.id===medId); if(!m) return;
+  const e = (m.historial||[])[idx]; if(!e) return;
+  if (!confirm('¿Eliminar este registro del historial?')) return;
+  const hist = (m.historial||[]).filter((_,i)=>i!==idx);
+  const nuevoStock = e.tipo==='tomar' ? m.stock + e.cantidad : Math.max(0, m.stock - e.cantidad);
+  try {
+    await apiFetch('/api/medicamentos','PATCH',{id:medId,stock:nuevoStock,historial:hist});
+    await cargarTodo();
+    verHistorial(medId);
+  } catch(err) { alert(err.message); }
+}
 
 async function eliminarMed(id) {
   const m=meds.find(x=>x.id===id);
