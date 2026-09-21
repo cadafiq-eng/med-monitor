@@ -1,6 +1,20 @@
 import { assertServerConfig, getSql } from './db.js';
 import { verifyToken } from './auth.js';
 
+// Postgres/Neon devuelve las columnas NUMERIC (stock, consumo_diario) como
+// texto (para no perder precisión), no como número JS. Si no se convierten
+// aquí, el frontend hace aritmética con strings: "-50" + 210 concatena en
+// vez de sumar ("-50210"), corrompiendo el stock. Se normaliza una sola vez,
+// en cada respuesta, para que el resto de la app siempre reciba números reales.
+function normalizarMed(row) {
+  if (!row) return row;
+  return {
+    ...row,
+    stock: row.stock !== null && row.stock !== undefined ? Number(row.stock) : row.stock,
+    consumo_diario: row.consumo_diario !== null && row.consumo_diario !== undefined ? Number(row.consumo_diario) : row.consumo_diario,
+  };
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
@@ -21,7 +35,7 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
       const rows = await sql`SELECT * FROM medicamentos WHERE user_id = ${userId} ORDER BY created_at`;
-      return res.status(200).json(rows);
+      return res.status(200).json(rows.map(normalizarMed));
     }
 
     if (req.method === 'POST') {
@@ -30,7 +44,7 @@ export default async function handler(req, res) {
         INSERT INTO medicamentos (user_id, nombre, stock, consumo_diario, consumo_variable, tomas, dias_aviso, fecha_inicio, dias_recetados, unidades)
         VALUES (${userId}, ${nombre}, ${stock}, ${consumo_diario}, ${!!consumo_variable}, ${tomas}, ${dias_aviso}, ${fecha_inicio}, ${dias_recetados}, ${unidades || 'pastillas'})
         RETURNING *`;
-      return res.status(201).json(row);
+      return res.status(201).json(normalizarMed(row));
     }
 
     if (req.method === 'PATCH') {
@@ -58,7 +72,7 @@ export default async function handler(req, res) {
       }
 
       const [row] = await sql`SELECT * FROM medicamentos WHERE id = ${id} AND user_id = ${userId}`;
-      return res.status(200).json(row);
+      return res.status(200).json(normalizarMed(row));
     }
 
     if (req.method === 'DELETE') {
