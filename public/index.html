@@ -83,6 +83,9 @@ header{background:var(--header-bg);padding:12px 20px;position:sticky;top:0;z-ind
 .btn-historial{background:var(--bg);color:var(--text)}
 .btn-eliminar{background:#ff3b30;color:#fff}
 .history{font-size:11px;color:var(--sub);margin-top:-4px;margin-bottom:8px;line-height:1.4}
+.hist-header{position:sticky;top:-22px;z-index:5;background:var(--surface);margin:-22px -18px 10px;padding:22px 18px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--divider)}
+.hist-header h2{margin-bottom:0}
+.hist-header-cerrar{padding:6px 14px;font-size:13px;flex:0 0 auto;width:auto}
 .hist-row{background:var(--bg);border-radius:10px;padding:9px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
 .hist-row-body{flex:1;min-width:0}
 .hist-row-top{font-size:13px;font-weight:600}
@@ -311,7 +314,10 @@ body.dark .tag{background:#1c3a5c}
 <!-- MODAL HISTORIAL DE MEDICAMENTO -->
 <div class="modal-bg" id="modal-historial">
   <div class="modal">
-    <h2>📋 Historial — <span id="historial-med-nombre"></span></h2>
+    <div class="hist-header">
+      <h2>📋 Historial — <span id="historial-med-nombre"></span></h2>
+      <button class="btn-cancel hist-header-cerrar" id="btn-cerrar-historial-top">Cerrar</button>
+    </div>
     <input type="hidden" id="historial-med-id"/>
     <div id="historial-list"></div>
     <div class="modal-actions">
@@ -824,7 +830,9 @@ function verHistorial(id) {
   }).join('') : '<div class="empty"><p>Sin registros aún.</p></div>';
   $('modal-historial').classList.add('open');
 }
-$('btn-cerrar-historial').onclick = () => $('modal-historial').classList.remove('open');
+const cerrarHistorial = () => $('modal-historial').classList.remove('open');
+$('btn-cerrar-historial').onclick = cerrarHistorial;
+$('btn-cerrar-historial-top').onclick = cerrarHistorial;
 
 function editarConsumo(medId, idx) {
   const m = meds.find(x=>x.id===medId); if(!m) return;
