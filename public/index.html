@@ -513,7 +513,7 @@ function consumoPromedio(m) {
 }
 
 function diasRestantes(m) {
-  const c = consumoPromedio(m); return c ? Math.floor(m.stock/c) : null;
+  const c = consumoPromedio(m); return c ? Math.max(0, Math.floor(m.stock/c)) : null;
 }
 
 function resumenHistorial(m) {
@@ -533,15 +533,20 @@ function renderMeds() {
   list.innerHTML = meds.map(m => {
     const u=m.unidades||'pastillas', dias=diasRestantes(m), umbral=m.dias_aviso||10;
     const consumo=consumoPromedio(m);
-    const pct=consumo?Math.min(100,(m.stock/(consumo*(m.dias_recetados||30)))*100):(m.stock>0?100:0);
+    const pct=consumo?Math.max(0,Math.min(100,(m.stock/(consumo*(m.dias_recetados||30)))*100)):(m.stock>0?100:0);
     const cls=dias===null?'':dias<=3?'danger':dias<=umbral?'warn':'';
     const diasTxt=dias!==null?`${dias} días restantes`:m.consumo_variable?'sin datos aún':'—';
     const alerta=cls==='danger'?' ⚠️':cls==='warn'?' 🔶':'';
     const tag=m.consumo_variable?'<span class="tag">Variable</span>':'';
     const consumoTxt=m.consumo_variable?(consumo?`Prom: ${consumo.toFixed(1)} ${u}/día`:'Prom: sin datos'):`${m.consumo_diario} ${u}/día`;
+    const stockTxt = m.stock < 0 ? `<strong style="color:#ff3b30">0</strong>` : `<strong>${m.stock}</strong>`;
+    const negNote = m.stock < 0
+      ? `<div class="info" style="color:#ff3b30">⚠️ Se registró más consumo del stock disponible (faltan ${Math.abs(m.stock)} ${u} por justificar). Revisa el Historial.</div>`
+      : '';
     return `<div class="card-med">
       <div class="nombre">${m.nombre}${tag}${alerta}</div>
-      <div class="info">Stock: <strong>${m.stock}</strong> ${u} · ${diasTxt} · ${consumoTxt}</div>
+      <div class="info">Stock: ${stockTxt} ${u} · ${diasTxt} · ${consumoTxt}</div>
+      ${negNote}
       <div class="progress"><div class="progress-bar ${cls}" style="width:${pct}%"></div></div>
       ${resumenHistorial(m)}
       <div class="card-actions">
@@ -772,13 +777,15 @@ $('btn-save-accion').onclick = async () => {
   let nuevoStock;
 
   if (accionEditIdx !== null && hist[accionEditIdx]) {
-    // Edición: se revierte el efecto de la cantidad anterior y se aplica la nueva
+    // Edición: se revierte el efecto de la cantidad anterior y se aplica la nueva.
+    // No se recorta a 0 aquí: el recorte solo es visual (diasRestantes), para que
+    // revertir o editar un registro posterior siga siendo exacto (ver eliminarConsumo).
     const anterior = hist[accionEditIdx];
     const stockSinAnterior = anterior.tipo==='tomar' ? m.stock + anterior.cantidad : m.stock - anterior.cantidad;
-    nuevoStock = tipo==='tomar' ? Math.max(0, stockSinAnterior - cant) : stockSinAnterior + cant;
+    nuevoStock = tipo==='tomar' ? (stockSinAnterior - cant) : (stockSinAnterior + cant);
     hist[accionEditIdx] = { fecha:`${fecha}T12:00:00.000Z`, tipo, cantidad:cant, ...(momento&&{momento}) };
   } else {
-    nuevoStock = tipo==='tomar' ? Math.max(0, m.stock - cant) : m.stock + cant;
+    nuevoStock = tipo==='tomar' ? (m.stock - cant) : (m.stock + cant);
     hist.push({ fecha:`${fecha}T12:00:00.000Z`, tipo, cantidad:cant, ...(momento&&{momento}) });
   }
 
@@ -843,7 +850,7 @@ async function eliminarConsumo(medId, idx) {
   const e = (m.historial||[])[idx]; if(!e) return;
   if (!confirm('¿Eliminar este registro del historial?')) return;
   const hist = (m.historial||[]).filter((_,i)=>i!==idx);
-  const nuevoStock = e.tipo==='tomar' ? m.stock + e.cantidad : Math.max(0, m.stock - e.cantidad);
+  const nuevoStock = e.tipo==='tomar' ? (m.stock + e.cantidad) : (m.stock - e.cantidad);
   try {
     await apiFetch('/api/medicamentos','PATCH',{id:medId,stock:nuevoStock,historial:hist});
     await cargarTodo();
