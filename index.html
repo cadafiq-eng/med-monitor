@@ -200,6 +200,9 @@ details.group-closed summary{cursor:pointer;font-size:14px;font-weight:700;paddi
 
   <!-- TAB: Consumo -->
   <div class="tab-section" id="tab-consumo">
+    <div class="toolbar">
+      <button class="btn-sm btn-editar" onclick="abrirAgregarConsumo()">＋ Agregar</button>
+    </div>
     <div class="med-list" id="consumo-list"></div>
   </div>
 
@@ -392,6 +395,20 @@ details.group-closed summary{cursor:pointer;font-size:14px;font-weight:700;paddi
     <div id="historial-list"></div>
     <div class="modal-actions">
       <button class="btn-cancel" id="btn-cerrar-historial">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AGREGAR A CONSUMO -->
+<div class="modal-bg" id="modal-agregar-consumo">
+  <div class="modal">
+    <h2>Agregar a consumo</h2>
+    <div style="margin-bottom:12px">
+      <button class="btn-sm btn-tomar" onclick="nuevoMedConsumo()">＋ Nuevo medicamento</button>
+    </div>
+    <div id="agregar-consumo-list"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-cerrar-agregar-consumo">Cerrar</button>
     </div>
   </div>
 </div>
@@ -839,12 +856,44 @@ function resumenHistorial(m) {
 }
 
 /* ── Consumo ── */
+function renderAgregarConsumo() {
+  const ocultos = data.medications.filter(m => m.status !== 'suspendido' && !m.seguimiento_consumo);
+  const list = $('agregar-consumo-list');
+  if (!ocultos.length) {
+    list.innerHTML = '<div class="settings-note">Todos tus medicamentos ya están en consumo.</div>';
+    return;
+  }
+  list.innerHTML = ocultos.map(m => `<div class="card-med">
+      <div class="nombre">${esc(m.name)}</div>
+      <div class="info">${esc(specialtyName(m.specialtyId))}</div>
+      <div class="card-actions"><button class="btn-sm btn-tomar" onclick="activarSeguimiento(${m.id})">Activar seguimiento</button></div>
+    </div>`).join('');
+}
+function abrirAgregarConsumo() {
+  renderAgregarConsumo();
+  $('modal-agregar-consumo').classList.add('open');
+}
+function activarSeguimiento(id) {
+  const m = data.medications.find(x => x.id === id);
+  if (!m) return;
+  m.seguimiento_consumo = true;
+  saveData(); renderAll();
+  renderAgregarConsumo();
+}
+function nuevoMedConsumo() {
+  $('modal-agregar-consumo').classList.remove('open');
+  abrirMed(null);
+  $('med-seguimiento').checked = true;
+  $('med-stock-section').style.display = '';
+}
+$('btn-cerrar-agregar-consumo').onclick = () => $('modal-agregar-consumo').classList.remove('open');
+
 function renderConsumo() {
   const list = $('consumo-list');
   const meds = data.medications.filter(m => m.status !== 'suspendido' && m.seguimiento_consumo);
   if (!meds.length) {
     list.innerHTML = data.medications.length
-      ? '<div class="empty"><div class="ico">📦</div><p>Sin seguimiento de consumo.<br>Actívalo en el medicamento que quieras seguir: Resurtidos → Editar → Seguimiento de consumo.</p></div>'
+      ? '<div class="empty"><div class="ico">📦</div><p>Sin seguimiento de consumo.<br>Toca ＋ Agregar arriba para activar un medicamento.</p></div>'
       : '<div class="empty"><div class="ico">📦</div><p>Sin medicamentos.<br>Importa tus datos o añade uno en Resurtidos.</p></div>';
     return;
   }
