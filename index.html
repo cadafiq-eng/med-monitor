@@ -296,10 +296,16 @@ details.group-closed summary{cursor:pointer;font-size:14px;font-weight:700;paddi
       <option value="pendiente">Pendiente</option>
       <option value="solicitado">Solicitado (Ya lo pedí)</option>
       <option value="surtido">Surtido</option>
+      <option value="suspendido">Suspendido</option>
       <option value="terminado">Terminado</option>
     </select>
     <label>Nota (opcional)</label>
     <textarea id="med-nota" placeholder="Ej. La dosis no se lee con claridad en la receta…"></textarea>
+    <label class="check-row">
+      <input type="checkbox" id="med-seguimiento"/>
+      <span>Seguimiento de consumo<span class="hint">Actívalo solo para los medicamentos de los que quieres llevar stock y consumo aquí. Los demás se siguen con tu app de alarma y registro.</span></span>
+    </label>
+    <div id="med-stock-section">
     <h3>Stock y consumo (opcional)</h3>
     <label>Stock actual</label>
     <div style="display:flex;gap:8px">
@@ -325,6 +331,7 @@ details.group-closed summary{cursor:pointer;font-size:14px;font-weight:700;paddi
     <input type="date" id="med-fecha"/>
     <label>Días recetados (opcional)</label>
     <input type="number" id="med-dias" placeholder="30" min="1"/>
+    </div>
     <div class="modal-actions">
       <button class="btn-cancel" id="btn-cancel-med">Cancelar</button>
       <button class="btn-save" id="btn-save-med">Guardar</button>
@@ -581,6 +588,7 @@ function normalizeImport(raw) {
     refillDate: m.refillDate || null,
     specialtyId: (m.specialtyId == null || m.specialtyId === '') ? null : Number(m.specialtyId),
     status: ['pendiente','solicitado','surtido','terminado','suspendido'].includes(m.status) ? m.status : 'pendiente',
+    seguimiento_consumo: m.seguimiento_consumo === true || (m.seguimiento_consumo === undefined && (numOrNull(m.stock) != null || arr(m.historial).length > 0)),
     stock: numOrNull(m.stock),
     unidades: m.unidades || 'pastillas',
     consumo_diario: numOrNull(m.consumo_diario),
@@ -833,9 +841,11 @@ function resumenHistorial(m) {
 /* ── Consumo ── */
 function renderConsumo() {
   const list = $('consumo-list');
-  const meds = data.medications.filter(m => m.status !== 'suspendido');
+  const meds = data.medications.filter(m => m.status !== 'suspendido' && m.seguimiento_consumo);
   if (!meds.length) {
-    list.innerHTML = '<div class="empty"><div class="ico">📦</div><p>Sin medicamentos.<br>Importa tus datos o añade uno en Resurtidos.</p></div>';
+    list.innerHTML = data.medications.length
+      ? '<div class="empty"><div class="ico">📦</div><p>Sin seguimiento de consumo.<br>Actívalo en el medicamento que quieras seguir: Resurtidos → Editar → Seguimiento de consumo.</p></div>'
+      : '<div class="empty"><div class="ico">📦</div><p>Sin medicamentos.<br>Importa tus datos o añade uno en Resurtidos.</p></div>';
     return;
   }
   list.innerHTML = meds.map(m => {
@@ -1096,6 +1106,9 @@ function abrirMed(id, soloStock) {
   $('med-aviso').value = m ? (m.dias_aviso || 10) : 10;
   $('med-fecha').value = m ? (m.fecha_inicio || '') : '';
   $('med-dias').value = m && m.dias_recetados != null ? m.dias_recetados : '';
+  $('med-seguimiento').checked = !!(m && (m.seguimiento_consumo === true || (m.seguimiento_consumo === undefined && (m.stock != null || (m.historial || []).length > 0))));
+  $('med-stock-section').style.display = $('med-seguimiento').checked ? '' : 'none';
+  $('med-seguimiento').onchange = () => { $('med-stock-section').style.display = $('med-seguimiento').checked ? '' : 'none'; };
   $('modal-med').classList.add('open');
   if (soloStock) setTimeout(() => $('med-stock').focus(), 100);
 }
@@ -1119,6 +1132,7 @@ $('btn-save-med').onclick = () => {
     unidades: $('med-unidades').value.trim() || 'pastillas',
     consumo_diario: consumoVal === '' ? null : Number(consumoVal),
     consumo_variable: $('med-variable').checked,
+    seguimiento_consumo: $('med-seguimiento').checked,
     tomas: $('med-tomas').value.trim() === '' ? null : Number($('med-tomas').value),
     dias_aviso: Number($('med-aviso').value) || 10,
     fecha_inicio: $('med-fecha').value || null,
