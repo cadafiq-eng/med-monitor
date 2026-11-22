@@ -98,6 +98,8 @@ body.dark .chip-solicitado{background:#4a3d00;color:#ffd60a}
 .chip-surtido{background:#d9f2e3;color:#1e7e34}
 body.dark .chip-surtido{background:#14532d;color:#7ee2a8}
 .chip-terminado{background:var(--bg);color:var(--sub)}
+.chip-suspendido{background:#ececf1;color:#6b6b80}
+body.dark .chip-suspendido{background:#2c2c38;color:#b9b9cc}
 .chip-realizada{background:#d9f2e3;color:#1e7e34}
 body.dark .chip-realizada{background:#14532d;color:#7ee2a8}
 .chip-alta{background:#fde8e8;color:#c0392b}
@@ -578,7 +580,7 @@ function normalizeImport(raw) {
     note: m.note || null,
     refillDate: m.refillDate || null,
     specialtyId: (m.specialtyId == null || m.specialtyId === '') ? null : Number(m.specialtyId),
-    status: ['pendiente','solicitado','surtido','terminado'].includes(m.status) ? m.status : 'pendiente',
+    status: ['pendiente','solicitado','surtido','terminado','suspendido'].includes(m.status) ? m.status : 'pendiente',
     stock: numOrNull(m.stock),
     unidades: m.unidades || 'pastillas',
     consumo_diario: numOrNull(m.consumo_diario),
@@ -642,6 +644,7 @@ function statusMeta(st) {
     solicitado:  { label: 'Ya lo pedí',  cls: 'chip-solicitado' },
     surtido:     { label: 'Surtido',     cls: 'chip-surtido' },
     terminado:   { label: 'Terminado',   cls: 'chip-terminado' },
+    suspendido:  { label: 'Suspendido',  cls: 'chip-suspendido' },
     realizada:   { label: 'Realizada',   cls: 'chip-realizada' }
   }[st] || { label: st, cls: 'chip-pendiente' };
 }
@@ -702,16 +705,20 @@ function medCard(m) {
   const meta = statusMeta(m.status);
   const diff = dayDiff(m.refillDate);
   const dias = diasRestantes(m);
-  const fechaTxt = m.refillDate
+  const fechaTxt = m.status === 'suspendido'
+    ? 'Suspendido temporalmente'
+    : m.refillDate
     ? `<b>${esc(fechaCorta(m.refillDate))}</b> · ${relResurtido(diff)} · fecha estimada`
     : 'Sin fecha de resurtido';
-  const stockTxt = (dias !== null && m.stock != null)
+  const stockTxt = (m.status !== 'suspendido' && dias !== null && m.stock != null)
     ? ` · quedan ${dias} ${pluralDias(dias)} de stock` : '';
   const doseTxt = m.dose ? ` · ${esc(m.dose)}` : '';
   let acciones = '';
   if (m.status === 'pendiente') acciones += `<button class="btn-sm btn-ya" onclick="setMedStatus(${m.id},'solicitado')">Ya lo pedí</button>`;
   if (m.status === 'solicitado') acciones += `<button class="btn-sm btn-surtido" onclick="setMedStatus(${m.id},'surtido')">Surtido</button>`;
   if (m.status === 'surtido' || m.status === 'terminado') acciones += `<button class="btn-sm btn-editar" onclick="setMedStatus(${m.id},'pendiente')">Volver a pendiente</button>`;
+  if (m.status === 'suspendido') acciones += `<button class="btn-sm btn-surtido" onclick="setMedStatus(${m.id},'pendiente')">Reanudar</button>`;
+  else if (m.status !== 'terminado') acciones += `<button class="btn-sm btn-editar" onclick="setMedStatus(${m.id},'suspendido')">Suspender</button>`;
   acciones += `<button class="btn-sm btn-editar" onclick="abrirMed(${m.id})">Editar</button>`;
   acciones += `<button class="btn-sm btn-eliminar" onclick="eliminarMed(${m.id})">Eliminar</button>`;
   return `<div class="card-med">
@@ -745,7 +752,7 @@ function renderResurtidos() {
   let html = '';
   const grupo = (spec, meds) => {
     if (!meds.length) return '';
-    const prox = meds.filter(m => m.refillDate && m.status !== 'terminado' && m.status !== 'surtido')
+    const prox = meds.filter(m => m.refillDate && m.status !== 'terminado' && m.status !== 'surtido' && m.status !== 'suspendido')
       .map(m => m.refillDate).sort()[0];
     const proxTxt = prox ? ` · próximo: ${esc(fechaCorta(prox))} (${relResurtido(dayDiff(prox))})` : '';
     return `<div class="group-title">${esc(spec.name)}${spec.id != null ? ` <button class="btn-sm btn-editar" style="margin-left:8px" onclick="abrirEspecialidad(${spec.id})">Editar</button>` : ''}</div>
@@ -762,7 +769,7 @@ function renderResurtidos() {
     }).join('');
     if (inner) html += `<details class="group-closed"><summary>Especialidades no vigentes</summary>${inner}</details>`;
   }
-  const sinFecha = data.medications.filter(m => !m.refillDate && m.status !== 'terminado');
+  const sinFecha = data.medications.filter(m => !m.refillDate && m.status !== 'terminado' && m.status !== 'suspendido');
   if (sinFecha.length) {
     html += `<div class="group-title">Sin fecha</div>
       <div class="group-sub">Sin fecha estimada de resurtido</div>
@@ -772,6 +779,11 @@ function renderResurtidos() {
   if (terminados.length) {
     html += `<details class="group-closed"><summary>Terminados (${terminados.length})</summary>
       <div class="med-list" style="padding-top:6px">${terminados.sort(medSort).map(medCard).join('')}</div></details>`;
+  }
+  const suspendidos = data.medications.filter(m => m.status === 'suspendido');
+  if (suspendidos.length) {
+    html += `<details class="group-closed"><summary>Suspendidos (${suspendidos.length})</summary>
+      <div class="med-list" style="padding-top:6px">${suspendidos.sort(medSort).map(medCard).join('')}</div></details>`;
   }
   if (!html) html = '<div class="empty"><div class="ico">💊</div><p>Sin medicamentos.<br>Toca <strong>+</strong> para agregar.</p></div>';
   list.innerHTML = html;
@@ -821,7 +833,7 @@ function resumenHistorial(m) {
 /* ── Consumo ── */
 function renderConsumo() {
   const list = $('consumo-list');
-  const meds = data.medications;
+  const meds = data.medications.filter(m => m.status !== 'suspendido');
   if (!meds.length) {
     list.innerHTML = '<div class="empty"><div class="ico">📦</div><p>Sin medicamentos.<br>Importa tus datos o añade uno en Resurtidos.</p></div>';
     return;
