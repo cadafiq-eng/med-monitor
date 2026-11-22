@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Med-Monitor</title>
-<link rel="manifest" href="/manifest.json"/>
+<title>Resurtidos</title>
+<link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#007AFF"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-<meta name="apple-mobile-web-app-title" content="Med-Monitor"/>
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png"/>
-<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png"/>
-<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png"/>
+<meta name="apple-mobile-web-app-title" content="Resurtidos"/>
+<link rel="icon" type="image/png" sizes="192x192" href="public/icon-192.png"/>
+<link rel="icon" type="image/png" sizes="512x512" href="public/icon-512.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="public/icon-180.png"/>
 <style>
 :root{
   --bg:#f2f2f7;--surface:#fff;--text:#1c1c1e;--sub:#6c6c70;
@@ -29,27 +29,15 @@ body.dark{
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);transition:background .25s,color .25s}
 
-/* ── Auth ── */
-#auth{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
-#auth .card{background:var(--surface);border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 4px 24px var(--shadow)}
-#auth .logo{font-size:48px;text-align:center;margin-bottom:8px}
-#auth h1{text-align:center;font-size:22px;font-weight:700;margin-bottom:4px}
-#auth p{text-align:center;color:var(--sub);font-size:14px;margin-bottom:24px}
-#auth input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:16px;margin-bottom:12px;outline:none;background:var(--input-bg);color:var(--text)}
-#auth input:focus{border-color:#007AFF}
-#auth .btn-primary{width:100%;padding:14px;background:#007AFF;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:12px}
-#auth .btn-link{width:100%;background:none;border:none;color:#007AFF;font-size:14px;cursor:pointer;padding:4px}
-#auth .error{color:#ff3b30;font-size:13px;text-align:center;margin-bottom:8px;min-height:18px}
-
 /* ── App shell ── */
-#app{display:none;max-width:480px;margin:0 auto;padding-bottom:60px}
+#app{max-width:480px;margin:0 auto;padding-bottom:60px}
 header{background:var(--header-bg);padding:12px 20px;position:sticky;top:0;z-index:10;border-bottom:1px solid var(--divider);display:flex;align-items:center;justify-content:space-between}
 .header-left h1{font-size:18px;font-weight:700}
 .header-left .sub{font-size:11px;color:var(--sub);margin-top:1px}
 .header-right{display:flex;gap:6px;align-items:center}
-#btn-dark,#btn-settings{background:none;border:none;font-size:20px;cursor:pointer;padding:4px 6px;border-radius:8px}
+#btn-dark{background:none;border:none;font-size:20px;cursor:pointer;padding:4px 6px;border-radius:8px}
 .sync-bar{font-size:11px;padding:3px 16px;background:var(--bg);color:var(--sub);text-align:right}
-.sync-bar.ok{color:#34c759}.sync-bar.err{color:#ff3b30}.sync-bar.spin{color:#ff9500}
+.sync-bar.ok{color:#34c759}
 
 /* ── Tab bar ── */
 .tab-bar{position:fixed;bottom:0;left:0;right:0;background:var(--tab-bg);border-top:1px solid var(--divider);display:flex;z-index:20;max-width:480px;margin:0 auto}
@@ -65,23 +53,27 @@ header{background:var(--header-bg);padding:12px 20px;position:sticky;top:0;z-ind
 .fab.presion-fab{background:#e74c3c}
 .fab.presion-fab:active{background:#c0392b}
 
-/* ── Tarjetas medicamentos ── */
+/* ── Tarjetas ── */
 .med-list{padding:12px 14px}
 .empty{text-align:center;padding:50px 20px;color:var(--sub)}
 .empty .ico{font-size:44px;margin-bottom:10px}
 .card-med{background:var(--surface);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:var(--card-shadow)}
 .card-med .nombre{font-size:16px;font-weight:600;margin-bottom:4px}
 .card-med .info{font-size:12px;color:var(--sub);margin-bottom:8px}
+.card-med .info b{color:var(--text)}
 .progress{height:5px;background:var(--divider);border-radius:3px;margin-bottom:8px}
 .progress-bar{height:100%;border-radius:3px;background:#34c759;transition:width .4s}
 .progress-bar.warn{background:#ff9500}.progress-bar.danger{background:#ff3b30}
 .card-actions{display:flex;gap:6px;flex-wrap:wrap}
-.btn-sm{padding:6px 12px;border-radius:9px;border:none;font-size:12px;font-weight:600;cursor:pointer}
+.btn-sm{padding:6px 12px;border-radius:9px;border:none;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block}
 .btn-tomar{background:#007AFF;color:#fff}
 .btn-reabastecer{background:#34c759;color:#fff}
 .btn-editar{background:var(--bg);color:var(--text)}
 .btn-historial{background:var(--bg);color:var(--text)}
 .btn-eliminar{background:#ff3b30;color:#fff}
+.btn-ya{background:#ff9500;color:#fff}
+.btn-surtido{background:#34c759;color:#fff}
+.btn-ver{background:#007AFF;color:#fff}
 .history{font-size:11px;color:var(--sub);margin-top:-4px;margin-bottom:8px;line-height:1.4}
 .hist-row{background:var(--bg);border-radius:10px;padding:9px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
 .hist-row-body{flex:1;min-width:0}
@@ -94,6 +86,31 @@ header{background:var(--header-bg);padding:12px 20px;position:sticky;top:0;z-ind
 .hist-del{color:#ff3b30}
 .tag{display:inline-block;background:#e8f1ff;color:#007AFF;border-radius:5px;padding:1px 5px;font-size:10px;font-weight:700;margin-left:5px}
 body.dark .tag{background:#1c3a5c}
+.note{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.45;white-space:pre-wrap}
+.small{font-size:11px;color:var(--sub)}
+.group-title{font-size:14px;font-weight:700;padding:16px 14px 2px}
+.group-sub{font-size:11px;color:var(--sub);padding:0 14px 4px}
+.chip{display:inline-block;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;margin-left:6px;white-space:nowrap}
+.chip-pendiente{background:#e8f1ff;color:#007AFF}
+body.dark .chip-pendiente{background:#1c3a5c;color:#7db8ff}
+.chip-solicitado{background:#fff3cd;color:#8a6d00}
+body.dark .chip-solicitado{background:#4a3d00;color:#ffd60a}
+.chip-surtido{background:#d9f2e3;color:#1e7e34}
+body.dark .chip-surtido{background:#14532d;color:#7ee2a8}
+.chip-terminado{background:var(--bg);color:var(--sub)}
+.chip-realizada{background:#d9f2e3;color:#1e7e34}
+body.dark .chip-realizada{background:#14532d;color:#7ee2a8}
+.chip-alta{background:#fde8e8;color:#c0392b}
+.chip-media{background:#fff3cd;color:#8a6d00}
+.alert-card{background:var(--surface);border-radius:14px;padding:14px;margin:0 14px 10px;box-shadow:var(--card-shadow);border-left:4px solid #ff9500}
+.alert-card.alta{border-left-color:#ff3b30}
+.alert-card .nombre{font-size:15px;font-weight:700;margin-bottom:4px}
+.alert-card .detail{font-size:12px;color:var(--sub);line-height:1.45}
+.toolbar{padding:12px 14px 0;display:flex;gap:8px}
+details.group-closed{margin:0 14px}
+details.group-closed summary{cursor:pointer;font-size:14px;font-weight:700;padding:12px 0;color:var(--sub)}
+.link-row{margin-top:8px}
+.filepath{font-size:11px;color:var(--sub);margin-top:6px;word-break:break-all}
 
 /* ── Presión Arterial ── */
 .pa-dashboard{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 14px 4px}
@@ -125,15 +142,18 @@ body.dark .tag{background:#1c3a5c}
 .settings-btn{width:100%;padding:13px 14px;background:none;border:none;border-top:1px solid var(--divider);text-align:left;font-size:15px;cursor:pointer;color:var(--text);display:flex;align-items:center;gap:10px}
 .settings-btn:first-of-type{border-top:none}
 .settings-btn.danger{color:#ff3b30}
+.settings-note{font-size:12px;color:var(--sub);line-height:1.45;padding:10px 14px}
 
 /* ── Modal ── */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:flex-end;justify-content:center}
 .modal-bg.open{display:flex}
 .modal{background:var(--surface);border-radius:22px 22px 0 0;padding:22px 18px 36px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
 .modal h2{font-size:17px;font-weight:700;margin-bottom:14px}
+.modal h3{font-size:13px;font-weight:700;color:var(--sub);margin:18px 0 2px;text-transform:uppercase;letter-spacing:.5px}
 .modal label{font-size:12px;color:var(--sub);display:block;margin-bottom:3px;margin-top:10px}
-.modal input:not([type=checkbox]),.modal select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;outline:none;background:var(--input-bg);color:var(--text);-webkit-appearance:none;appearance:none}
-.modal input:not([type=checkbox]):focus,.modal select:focus{border-color:#007AFF}
+.modal input:not([type=checkbox]),.modal select,.modal textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;outline:none;background:var(--input-bg);color:var(--text);-webkit-appearance:none;appearance:none;font-family:inherit}
+.modal input:not([type=checkbox]):focus,.modal select:focus,.modal textarea:focus{border-color:#007AFF}
+.modal textarea{resize:vertical;min-height:64px}
 .modal label.check-row{display:flex !important;align-items:flex-start;gap:10px;margin:12px 0 4px;font-size:14px;color:var(--text)}
 .modal label.check-row input[type=checkbox]{width:18px;height:18px;flex:0 0 18px;margin:1px 0 0;accent-color:#007AFF;cursor:pointer}
 .hint{font-size:11px;color:var(--sub);line-height:1.4;margin-top:3px;display:block}
@@ -148,102 +168,110 @@ body.dark .tag{background:#1c3a5c}
 .pa-chart-legend{display:flex;gap:14px;margin-top:6px;font-size:11px;color:var(--sub)}
 .pa-chart-legend span{display:flex;align-items:center;gap:5px}
 .pa-chart-legend span span{width:18px;height:3px;border-radius:2px;display:inline-block}
-
-/* ── Número grande PA ── */
 .pa-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px}
 .pa-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+.linklike{background:none;border:none;color:#007AFF;font-size:13px;font-weight:600;cursor:pointer;padding:4px 0;text-align:left}
 </style>
 </head>
 <body>
 
-<!-- AUTH -->
-<div id="auth">
-  <div class="card">
-    <div class="logo">💊❤️</div>
-    <h1>Med-Monitor</h1>
-    <p>Medicamentos y presión arterial</p>
-    <div class="error" id="auth-error"></div>
-    <input type="email"    id="auth-email"    placeholder="Correo electrónico" autocomplete="email"/>
-    <input type="password" id="auth-pass"     placeholder="Contraseña" autocomplete="current-password"/>
-    <button class="btn-primary" id="btn-login">Entrar</button>
-    <button class="btn-link"    id="btn-toggle">¿No tienes cuenta? Regístrate</button>
-  </div>
-</div>
-
-<!-- APP -->
 <div id="app">
   <header>
     <div class="header-left">
-      <h1 id="header-title">💊 Medicamentos</h1>
-      <div class="sub" id="user-email"></div>
+      <h1 id="header-title">💊 Resurtidos</h1>
+      <div class="sub">Datos solo en este dispositivo</div>
     </div>
     <div class="header-right">
       <button id="btn-dark" title="Cambiar tema">🌙</button>
     </div>
   </header>
-  <div class="sync-bar" id="sync-bar">● Cargando…</div>
+  <div class="sync-bar ok" id="status-bar">● Guardado en este dispositivo</div>
 
-  <!-- TAB: Medicamentos -->
-  <div class="tab-section active" id="tab-meds">
-    <div class="med-list" id="med-list">
-      <div class="empty"><div class="ico">💊</div><p>Sin medicamentos.<br>Toca <strong>+</strong> para agregar.</p></div>
+  <!-- TAB: Resurtidos -->
+  <div class="tab-section active" id="tab-resurtidos">
+    <div id="alertas-list"></div>
+    <div class="toolbar">
+      <button class="btn-sm btn-editar" onclick="abrirEspecialidad()">＋ Nueva especialidad</button>
     </div>
+    <div id="resurtidos-list"></div>
   </div>
 
-  <!-- TAB: Presión Arterial -->
-  <div class="tab-section" id="tab-pa">
+  <!-- TAB: Consumo -->
+  <div class="tab-section" id="tab-consumo">
+    <div class="med-list" id="consumo-list"></div>
+  </div>
+
+  <!-- TAB: Recetas -->
+  <div class="tab-section" id="tab-recetas">
+    <div class="med-list" id="recetas-list"></div>
+    <div class="settings-note">Las recetas UADY solo valen 5 días naturales en FarmaUADY. El resurtido necesita una nueva receta de control con cita.</div>
+  </div>
+
+  <!-- TAB: Citas -->
+  <div class="tab-section" id="tab-citas">
+    <div class="med-list" id="citas-list"></div>
+  </div>
+
+  <!-- TAB: Más -->
+  <div class="tab-section" id="tab-mas">
+    <div class="group-title">❤️ Presión arterial</div>
     <div class="pa-dashboard" id="pa-dashboard">
       <div class="pa-card"><div class="pa-val" id="pa-avg-sis">—</div><div class="pa-lbl">Sistólica</div><div class="pa-unit">mmHg prom.</div></div>
       <div class="pa-card"><div class="pa-val" id="pa-avg-dia">—</div><div class="pa-lbl">Diastólica</div><div class="pa-unit">mmHg prom.</div></div>
       <div class="pa-card"><div class="pa-val" id="pa-avg-frec">—</div><div class="pa-lbl">Frecuencia</div><div class="pa-unit">lpm prom.</div></div>
     </div>
     <div class="pa-chart-wrap" id="pa-chart"></div>
-    <div class="pa-list" id="pa-list">
-      <div class="empty"><div class="ico">❤️</div><p>Sin registros.<br>Toca <strong>+</strong> para agregar.</p></div>
-    </div>
+    <div class="pa-list" id="pa-list"></div>
     <div class="pa-ref">
       🟢 Normal &lt;120/80 &nbsp;|&nbsp; 🟡 Elevada 120-129 &nbsp;|&nbsp; 🟠 HT1 130-139/80-89<br>
       🔴 HT2 ≥140/90 &nbsp;|&nbsp; 🚨 Crisis &gt;180/120 &nbsp;|&nbsp; 🔵 Hipotensión &lt;90/60
     </div>
-  </div>
-
-  <!-- TAB: Ajustes -->
-  <div class="tab-section" id="tab-settings">
     <div class="settings-list">
       <div class="settings-section">
-        <h3>Medicamentos</h3>
-        <button class="settings-btn" id="btn-export">📤 Exportar medicamentos</button>
-        <button class="settings-btn" id="btn-import-trigger">📥 Importar medicamentos</button>
+        <h3>Respaldo</h3>
+        <button class="settings-btn" id="btn-export">📤 Exportar todos los datos (JSON)</button>
+        <button class="settings-btn" id="btn-import-trigger">📥 Importar datos (JSON)</button>
+        <button class="settings-btn" id="btn-export-pa">📤 Exportar presión arterial (CSV)</button>
       </div>
       <div class="settings-section">
-        <h3>Presión Arterial</h3>
-        <button class="settings-btn" id="btn-export-pa">📤 Exportar lecturas PA</button>
+        <h3>Avisos en este dispositivo</h3>
+        <button class="settings-btn" id="btn-test-aviso">🔔 Probar un aviso</button>
+        <div class="settings-note" id="aviso-status">Los avisos solo se muestran con la app abierta; con la app cerrada no están garantizados.</div>
       </div>
       <div class="settings-section">
-        <h3>Cuenta</h3>
-        <button class="settings-btn" id="btn-cambiar-pass">🔑 Cambiar contraseña</button>
-        <button class="settings-btn danger" id="btn-logout">🚪 Cerrar sesión</button>
+        <h3>Apariencia y datos</h3>
+        <button class="settings-btn" id="btn-dark-mas">🌙 Cambiar a modo oscuro / claro</button>
+        <button class="settings-btn danger" id="btn-borrar-todo">🗑 Borrar todos los datos</button>
       </div>
+      <div class="settings-note">Resurtidos — datos solo en este dispositivo, sin cuenta ni servidor. Las recetas se enlazan a Dropbox; ningún archivo de receta se guarda en el repositorio.</div>
     </div>
   </div>
 
   <!-- FABs -->
-  <button class="fab" id="fab-meds">+</button>
-  <button class="fab presion-fab" id="fab-pa" style="display:none">+</button>
+  <button class="fab" id="fab-resurtidos" title="Añadir medicamento">+</button>
+  <button class="fab" id="fab-recetas" style="display:none" title="Añadir receta">+</button>
+  <button class="fab" id="fab-citas" style="display:none" title="Añadir cita">+</button>
+  <button class="fab presion-fab" id="fab-pa" style="display:none" title="Registrar presión">+</button>
 
   <!-- Tab bar -->
   <div class="tab-bar">
-    <button class="tab-btn active" data-tab="meds">
-      <span class="tab-ico">💊</span>Medicamentos
+    <button class="tab-btn active" data-tab="resurtidos">
+      <span class="tab-ico">💊</span>Resurtidos
     </button>
-    <button class="tab-btn" data-tab="pa">
-      <span class="tab-ico">❤️</span>Presión
+    <button class="tab-btn" data-tab="consumo">
+      <span class="tab-ico">📦</span>Consumo
     </button>
-    <button class="tab-btn" data-tab="settings">
-      <span class="tab-ico">⚙️</span>Ajustes
+    <button class="tab-btn" data-tab="recetas">
+      <span class="tab-ico">📄</span>Recetas
+    </button>
+    <button class="tab-btn" data-tab="citas">
+      <span class="tab-ico">📅</span>Citas
+    </button>
+    <button class="tab-btn" data-tab="mas">
+      <span class="tab-ico">⚙️</span>Más
     </button>
   </div>
-  <input type="file" id="import-file" accept=".json" style="display:none"/>
+  <input type="file" id="import-file" accept=".json,application/json" style="display:none"/>
 </div>
 
 <!-- MODAL MEDICAMENTO -->
@@ -253,10 +281,28 @@ body.dark .tag{background:#1c3a5c}
     <input type="hidden" id="med-id"/>
     <label>Nombre del medicamento</label>
     <input type="text" id="med-nombre" placeholder="Ej. Metformina"/>
+    <label>Dosis (opcional)</label>
+    <input type="text" id="med-dosis" placeholder="Ej. 10 mg"/>
+    <label>Especialidad</label>
+    <select id="med-especialidad"></select>
+    <button class="linklike" type="button" onclick="abrirEspecialidadDesdeMed()">＋ Nueva especialidad</button>
+    <label>Fecha estimada de resurtido (opcional)</label>
+    <input type="date" id="med-fecha-resurtido"/>
+    <span class="hint">Fecha estimada por cantidad y dosis; ninguna receta trae fecha explícita de resurtido.</span>
+    <label>Estado</label>
+    <select id="med-estado">
+      <option value="pendiente">Pendiente</option>
+      <option value="solicitado">Solicitado (Ya lo pedí)</option>
+      <option value="surtido">Surtido</option>
+      <option value="terminado">Terminado</option>
+    </select>
+    <label>Nota (opcional)</label>
+    <textarea id="med-nota" placeholder="Ej. La dosis no se lee con claridad en la receta…"></textarea>
+    <h3>Stock y consumo (opcional)</h3>
     <label>Stock actual</label>
     <div style="display:flex;gap:8px">
-      <input type="number" id="med-stock"    placeholder="30"       min="0"   style="flex:2"/>
-      <input type="text"   id="med-unidades" placeholder="pastillas"          style="flex:1" list="sugerencias-unidades"/>
+      <input type="number" id="med-stock" placeholder="30" min="0" style="flex:2"/>
+      <input type="text" id="med-unidades" placeholder="pastillas" style="flex:1" list="sugerencias-unidades"/>
       <datalist id="sugerencias-unidades">
         <option value="pastillas"/><option value="gotas"/><option value="cápsulas"/>
         <option value="comprimidos"/><option value="aplicaciones"/><option value="ml"/>
@@ -270,16 +316,37 @@ body.dark .tag{background:#1c3a5c}
       <span>Consumo variable<span class="hint">Marca si la dosis no es fija. El promedio se calculará desde tu historial real.</span></span>
     </label>
     <label>Tomas por día</label>
-    <input type="number" id="med-tomas"  placeholder="1" min="1"/>
+    <input type="number" id="med-tomas" placeholder="1" min="1"/>
     <label>Días de aviso antes de agotarse</label>
-    <input type="number" id="med-aviso"  placeholder="10" min="1"/>
+    <input type="number" id="med-aviso" placeholder="10" min="1"/>
     <label>Fecha de inicio (opcional)</label>
-    <input type="date"   id="med-fecha"/>
+    <input type="date" id="med-fecha"/>
     <label>Días recetados (opcional)</label>
-    <input type="number" id="med-dias"   placeholder="30" min="1"/>
+    <input type="number" id="med-dias" placeholder="30" min="1"/>
     <div class="modal-actions">
       <button class="btn-cancel" id="btn-cancel-med">Cancelar</button>
-      <button class="btn-save"   id="btn-save-med">Guardar</button>
+      <button class="btn-save" id="btn-save-med">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ESPECIALIDAD -->
+<div class="modal-bg" id="modal-especialidad">
+  <div class="modal">
+    <h2 id="modal-esp-title">Nueva especialidad</h2>
+    <input type="hidden" id="esp-id"/>
+    <label>Nombre de la especialidad</label>
+    <input type="text" id="esp-nombre" placeholder="Ej. Reumatología"/>
+    <label>Estado</label>
+    <select id="esp-estado">
+      <option value="vigente">Vigente</option>
+      <option value="no_vigente">No vigente</option>
+    </select>
+    <label>Nota (opcional)</label>
+    <textarea id="esp-nota"></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-cancel-esp">Cancelar</button>
+      <button class="btn-save" id="btn-save-esp">Guardar</button>
     </div>
   </div>
 </div>
@@ -303,7 +370,7 @@ body.dark .tag{background:#1c3a5c}
     </select>
     <div class="modal-actions">
       <button class="btn-cancel" id="btn-cancel-accion">Cancelar</button>
-      <button class="btn-save"   id="btn-save-accion">Confirmar</button>
+      <button class="btn-save" id="btn-save-accion">Confirmar</button>
     </div>
   </div>
 </div>
@@ -316,6 +383,57 @@ body.dark .tag{background:#1c3a5c}
     <div id="historial-list"></div>
     <div class="modal-actions">
       <button class="btn-cancel" id="btn-cerrar-historial">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RECETA -->
+<div class="modal-bg" id="modal-receta">
+  <div class="modal">
+    <h2 id="modal-receta-title">Añadir receta</h2>
+    <input type="hidden" id="receta-id"/>
+    <label>Título</label>
+    <input type="text" id="receta-titulo" placeholder="Ej. Receta de control"/>
+    <label>Especialidad</label>
+    <select id="receta-especialidad"></select>
+    <label>Fecha de la receta</label>
+    <input type="date" id="receta-fecha"/>
+    <label>Nota (opcional)</label>
+    <textarea id="receta-nota"></textarea>
+    <label>Enlace a la receta (Dropbox, opcional)</label>
+    <input type="url" id="receta-enlace" placeholder="https://… (enlace de Dropbox)"/>
+    <span class="hint">Pega el enlace de Dropbox para abrir la receta sin duplicar el archivo.</span>
+    <label>Ruta del archivo en Dropbox (opcional)</label>
+    <input type="text" id="receta-archivo" placeholder="Ej. /Personal/Salud/Recetas UADY/…"/>
+    <span class="hint">Las recetas UADY solo valen 5 días naturales en FarmaUADY.</span>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-cancel-receta">Cancelar</button>
+      <button class="btn-save" id="btn-save-receta">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CITA -->
+<div class="modal-bg" id="modal-cita">
+  <div class="modal">
+    <h2 id="modal-cita-title">Añadir cita</h2>
+    <input type="hidden" id="cita-id"/>
+    <label>Título</label>
+    <input type="text" id="cita-titulo" placeholder="Ej. Revisión anual"/>
+    <label>Especialidad</label>
+    <select id="cita-especialidad"></select>
+    <label>Fecha</label>
+    <input type="date" id="cita-fecha"/>
+    <label>Estado</label>
+    <select id="cita-estado">
+      <option value="pendiente">Pendiente</option>
+      <option value="realizada">Realizada</option>
+    </select>
+    <label>Nota (opcional)</label>
+    <textarea id="cita-nota"></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-cancel-cita">Cancelar</button>
+      <button class="btn-save" id="btn-save-cita">Guardar</button>
     </div>
   </div>
 </div>
@@ -364,39 +482,18 @@ body.dark .tag{background:#1c3a5c}
   </div>
 </div>
 
-<!-- MODAL CAMBIAR CONTRASEÑA -->
-<div class="modal-bg" id="modal-pass">
-  <div class="modal">
-    <h2>🔑 Cambiar contraseña</h2>
-    <label>Contraseña actual</label>
-    <input type="password" id="pass-actual"    placeholder="Contraseña actual"      autocomplete="current-password"/>
-    <label>Nueva contraseña</label>
-    <input type="password" id="pass-nueva"     placeholder="Nueva contraseña"       autocomplete="new-password"/>
-    <label>Confirmar contraseña</label>
-    <input type="password" id="pass-confirmar" placeholder="Repite la nueva"        autocomplete="new-password"/>
-    <div class="error" id="pass-error"></div>
-    <div class="modal-actions">
-      <button class="btn-cancel" id="btn-cancel-pass">Cancelar</button>
-      <button class="btn-save"   id="btn-save-pass">Guardar</button>
-    </div>
-  </div>
-</div>
-
 <script>
-const API = '';
+const KEY = 'resurtidos_v1';
 const $ = id => document.getElementById(id);
-const token    = () => localStorage.getItem('med_token');
-const setToken = t  => localStorage.setItem('med_token', t);
-const setSyncBar = (msg, cls='') => {
-  const b = $('sync-bar'); b.textContent = msg; b.className = 'sync-bar ' + cls;
-};
+const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const safeLink = u => { const s = String(u || '').trim(); return /^https?:\/\//i.test(s) ? s : ''; };
+
+/* ── Fechas (local, sin corrimiento de -1 día) ── */
 const fechaLocal = (d = new Date()) => {
   const x = new Date(d);
   x.setMinutes(x.getMinutes() - x.getTimezoneOffset());
   return x.toISOString().slice(0, 10);
 };
-// Parsea 'YYYY-MM-DD' como medianoche LOCAL (evita el corrimiento de -1 día
-// que produce `new Date('YYYY-MM-DD')`, que JS interpreta como UTC).
 const parseFechaLocal = v => {
   if (!v) return new Date(NaN);
   const [y, m, d] = String(v).slice(0, 10).split('-').map(Number);
@@ -404,19 +501,168 @@ const parseFechaLocal = v => {
 };
 const fechaCorta = v => v ? parseFechaLocal(v).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'2-digit' }) : '';
 const horaCorta = v => v ? String(v).slice(0,5) : '';
-const consumosTomados = m => (m.historial || []).filter(x => x.tipo === 'tomar').sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+const startOfToday = () => { const t = new Date(); t.setHours(0,0,0,0); return t; };
+const dayDiff = v => {
+  const d = parseFechaLocal(v);
+  if (isNaN(d)) return null;
+  return Math.round((d - startOfToday()) / 86400000);
+};
+const pluralDias = n => n === 1 ? 'día' : 'días';
+const relResurtido = diff => {
+  if (diff == null) return '';
+  if (diff < 0) return 'vencido hace ' + (-diff) + ' ' + pluralDias(-diff);
+  if (diff === 0) return 'hoy';
+  if (diff === 1) return 'mañana';
+  return 'en ' + diff + ' días';
+};
+const relFecha = diff => {
+  if (diff == null) return '';
+  if (diff < 0) return 'hace ' + (-diff) + ' ' + pluralDias(-diff);
+  if (diff === 0) return 'hoy';
+  if (diff === 1) return 'mañana';
+  return 'en ' + diff + ' días';
+};
+
+/* ── Datos locales ── */
+function emptyData() {
+  return { version: 1, specialties: [], medications: [], appointments: [], alerts: [], recipes: [], pressure: [] };
+}
+let data = emptyData();
+function loadData() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) {
+      const parsed = normalizeImport(JSON.parse(raw));
+      data = parsed;
+      return;
+    }
+  } catch (e) { /* datos corruptos: se arranca vacío */ }
+  data = emptyData();
+}
+function saveData() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(data));
+    $('status-bar').textContent = '● Guardado en este dispositivo';
+  } catch (e) {
+    $('status-bar').textContent = '● No se pudo guardar en este dispositivo';
+  }
+}
+
+/* ── Normalización de importación (acepta la forma de datos-resurtidos.json) ── */
+function fixIds(list) {
+  const seen = new Set();
+  let max = 0;
+  list.forEach(x => { if (typeof x.id === 'number' && x.id > 0) max = Math.max(max, x.id); });
+  list.forEach(x => {
+    if (typeof x.id !== 'number' || x.id <= 0 || seen.has(x.id)) { max += 1; x.id = max; }
+    seen.add(x.id);
+  });
+  return list;
+}
+function normalizeImport(raw) {
+  if (Array.isArray(raw)) raw = { medications: raw };
+  if (!raw || typeof raw !== 'object') throw new Error('Formato inválido');
+  const arr = v => Array.isArray(v) ? v : [];
+  const numOrNull = v => (v === null || v === undefined || v === '') ? null : (isNaN(Number(v)) ? null : Number(v));
+  const out = emptyData();
+  out.specialties = fixIds(arr(raw.specialties).map(s => ({
+    id: Number(s.id) || 0,
+    name: String(s.name || 'Sin nombre'),
+    note: s.note || null,
+    status: s.status === 'no_vigente' ? 'no_vigente' : 'vigente'
+  })));
+  out.medications = fixIds(arr(raw.medications).map(m => ({
+    id: Number(m.id) || 0,
+    name: String(m.name || 'Sin nombre'),
+    dose: m.dose || null,
+    note: m.note || null,
+    refillDate: m.refillDate || null,
+    specialtyId: (m.specialtyId == null || m.specialtyId === '') ? null : Number(m.specialtyId),
+    status: ['pendiente','solicitado','surtido','terminado'].includes(m.status) ? m.status : 'pendiente',
+    stock: numOrNull(m.stock),
+    unidades: m.unidades || 'pastillas',
+    consumo_diario: numOrNull(m.consumo_diario),
+    consumo_variable: !!m.consumo_variable,
+    tomas: numOrNull(m.tomas),
+    dias_aviso: numOrNull(m.dias_aviso) || 10,
+    dias_recetados: numOrNull(m.dias_recetados),
+    fecha_inicio: m.fecha_inicio || null,
+    historial: arr(m.historial).map(h => ({
+      fecha: h.fecha || '',
+      tipo: h.tipo === 'reabastecer' ? 'reabastecer' : 'tomar',
+      cantidad: Number(h.cantidad) || 0,
+      momento: h.momento || ''
+    }))
+  })));
+  out.appointments = fixIds(arr(raw.appointments).map(a => ({
+    id: Number(a.id) || 0,
+    title: String(a.title || 'Cita'),
+    date: a.date || null,
+    specialtyId: (a.specialtyId == null || a.specialtyId === '') ? null : Number(a.specialtyId),
+    status: a.status === 'realizada' ? 'realizada' : 'pendiente',
+    note: a.note || null
+  })));
+  out.alerts = fixIds(arr(raw.alerts).map(a => ({
+    id: Number(a.id) || 0,
+    title: String(a.title || 'Aviso'),
+    detail: a.detail || '',
+    severity: a.severity === 'alta' ? 'alta' : 'media',
+    resolved: !!a.resolved
+  })));
+  out.recipes = fixIds(arr(raw.recipes).map(r => ({
+    id: Number(r.id) || 0,
+    title: String(r.title || 'Receta'),
+    date: r.date || null,
+    specialtyId: (r.specialtyId == null || r.specialtyId === '') ? null : Number(r.specialtyId),
+    note: r.note || null,
+    link: r.link || null,
+    file: r.file || null
+  })));
+  out.pressure = fixIds(arr(raw.pressure).map(l => ({
+    id: Number(l.id) || 0,
+    fecha: l.fecha || null,
+    hora: l.hora || '',
+    momento: l.momento || '',
+    sistolica: Number(l.sistolica) || 0,
+    diastolica: Number(l.diastolica) || 0,
+    frecuencia: numOrNull(l.frecuencia),
+    notas: l.notas || '',
+    categoria: l.categoria || null
+  })));
+  return out;
+}
+function nextId(list) {
+  return list.reduce((m, x) => Math.max(m, Number(x.id) || 0), 0) + 1;
+}
+function specialtyById(id) { return data.specialties.find(s => s.id === id) || null; }
+function specialtyName(id) { const s = specialtyById(id); return s ? s.name : 'Sin especialidad'; }
+function statusMeta(st) {
+  return {
+    pendiente:   { label: 'Pendiente',   cls: 'chip-pendiente' },
+    solicitado:  { label: 'Ya lo pedí',  cls: 'chip-solicitado' },
+    surtido:     { label: 'Surtido',     cls: 'chip-surtido' },
+    terminado:   { label: 'Terminado',   cls: 'chip-terminado' },
+    realizada:   { label: 'Realizada',   cls: 'chip-realizada' }
+  }[st] || { label: st, cls: 'chip-pendiente' };
+}
+function specialtyOptions(selectedId) {
+  const opts = data.specialties.map(s =>
+    `<option value="${s.id}"${s.id === selectedId ? ' selected' : ''}>${esc(s.name)}${s.status === 'no_vigente' ? ' (no vigente)' : ''}</option>`).join('');
+  return '<option value="">Sin especialidad</option>' + opts;
+}
 
 /* ── Modo oscuro ── */
 function applyTheme(dark) {
   document.body.classList.toggle('dark', dark);
   $('btn-dark').textContent = dark ? '☀️' : '🌙';
 }
-applyTheme(localStorage.getItem('med_dark') === '1');
-$('btn-dark').onclick = () => {
+function toggleDark() {
   const nowDark = !document.body.classList.contains('dark');
   localStorage.setItem('med_dark', nowDark ? '1' : '0');
   applyTheme(nowDark);
-};
+}
+$('btn-dark').onclick = toggleDark;
+$('btn-dark-mas').onclick = toggleDark;
 
 /* ── Tabs ── */
 function switchTab(tab) {
@@ -424,89 +670,130 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   $('tab-' + tab).classList.add('active');
   document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
-  $('fab-meds').style.display = tab === 'meds' ? 'flex' : 'none';
-  $('fab-pa').style.display   = tab === 'pa'   ? 'flex' : 'none';
-  const titles = { meds:'💊 Medicamentos', pa:'❤️ Presión Arterial', settings:'⚙️ Ajustes' };
+  $('fab-resurtidos').style.display = tab === 'resurtidos' ? 'flex' : 'none';
+  $('fab-recetas').style.display    = tab === 'recetas'    ? 'flex' : 'none';
+  $('fab-citas').style.display      = tab === 'citas'      ? 'flex' : 'none';
+  $('fab-pa').style.display         = tab === 'mas'        ? 'flex' : 'none';
+  const titles = { resurtidos:'💊 Resurtidos', consumo:'📦 Consumo', recetas:'📄 Recetas', citas:'📅 Citas', mas:'⚙️ Más' };
   $('header-title').textContent = titles[tab];
+  if (tab === 'mas') renderPA();
 }
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.onclick = () => switchTab(btn.dataset.tab);
 });
 
-/* ── fetch wrapper ── */
-async function apiFetch(path, method='GET', body=null) {
-  const opts = { method, headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token()}` } };
-  if (body) opts.body = JSON.stringify(body);
-  let r;
-  try { r = await fetch(API + path, opts); }
-  catch { throw new Error('Sin conexión.'); }
-  const text = await r.text();
-  const type = r.headers.get('content-type') || '';
-  if (!type.includes('application/json')) throw new Error(`Error en ${path}`);
-  const data = text ? JSON.parse(text) : {};
-  if (!r.ok) throw new Error(data.error || 'Error');
-  return data;
+/* ── Render general ── */
+function renderAll() {
+  renderResurtidos();
+  renderConsumo();
+  renderRecetas();
+  renderCitas();
+  renderPA();
 }
 
-/* ── Auth ── */
-let modoRegistro = false;
-$('btn-toggle').onclick = () => {
-  modoRegistro = !modoRegistro;
-  $('btn-login').textContent  = modoRegistro ? 'Registrarse' : 'Entrar';
-  $('btn-toggle').textContent = modoRegistro ? '¿Ya tienes cuenta? Entra' : '¿No tienes cuenta? Regístrate';
-  $('auth-error').textContent = '';
-};
-$('btn-login').onclick = async () => {
-  const email = $('auth-email').value.trim(), password = $('auth-pass').value;
-  if (!email || !password) { $('auth-error').textContent = 'Completa todos los campos'; return; }
-  try {
-    const res = await fetch(API + '/api/auth', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ action: modoRegistro ? 'register' : 'login', email, password })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    setToken(data.token);
-    localStorage.setItem('med_user', data.user.email);
-    iniciarApp();
-  } catch(e) { $('auth-error').textContent = e.message; }
-};
-
-/* ── App ── */
-let meds = [], lecturas = [];
-
-function iniciarApp() {
-  $('auth').style.display = 'none';
-  $('app').style.display  = 'block';
-  $('user-email').textContent = localStorage.getItem('med_user') || '';
-  switchTab('meds');
-  cargarTodo();
+/* ── Resurtidos ── */
+function medSort(a, b) {
+  if (a.refillDate && b.refillDate) return a.refillDate.localeCompare(b.refillDate);
+  if (a.refillDate) return -1;
+  if (b.refillDate) return 1;
+  return a.name.localeCompare(b.name, 'es');
 }
+function medCard(m) {
+  const meta = statusMeta(m.status);
+  const diff = dayDiff(m.refillDate);
+  const dias = diasRestantes(m);
+  const fechaTxt = m.refillDate
+    ? `<b>${esc(fechaCorta(m.refillDate))}</b> · ${relResurtido(diff)} · fecha estimada`
+    : 'Sin fecha de resurtido';
+  const stockTxt = (dias !== null && m.stock != null)
+    ? ` · quedan ${dias} ${pluralDias(dias)} de stock` : '';
+  const doseTxt = m.dose ? ` · ${esc(m.dose)}` : '';
+  let acciones = '';
+  if (m.status === 'pendiente') acciones += `<button class="btn-sm btn-ya" onclick="setMedStatus(${m.id},'solicitado')">Ya lo pedí</button>`;
+  if (m.status === 'solicitado') acciones += `<button class="btn-sm btn-surtido" onclick="setMedStatus(${m.id},'surtido')">Surtido</button>`;
+  if (m.status === 'surtido' || m.status === 'terminado') acciones += `<button class="btn-sm btn-editar" onclick="setMedStatus(${m.id},'pendiente')">Volver a pendiente</button>`;
+  acciones += `<button class="btn-sm btn-editar" onclick="abrirMed(${m.id})">Editar</button>`;
+  acciones += `<button class="btn-sm btn-eliminar" onclick="eliminarMed(${m.id})">Eliminar</button>`;
+  return `<div class="card-med">
+    <div class="nombre">${esc(m.name)}<span class="chip ${meta.cls}">${meta.label}</span></div>
+    <div class="info">${fechaTxt}${doseTxt}${stockTxt}</div>
+    ${m.note ? `<div class="note">${esc(m.note)}</div>` : ''}
+    <div class="card-actions" style="margin-top:8px">${acciones}</div></div>`;
+}
+function renderResurtidos() {
+  const list = $('resurtidos-list');
+  const alertas = $('alertas-list');
+  const abiertas = data.alerts.filter(a => !a.resolved);
+  alertas.innerHTML = abiertas.map(a => `
+    <div class="alert-card ${a.severity === 'alta' ? 'alta' : ''}">
+      <div class="nombre">⚠️ ${esc(a.title)}<span class="chip ${a.severity === 'alta' ? 'chip-alta' : 'chip-media'}">${a.severity === 'alta' ? 'Alta' : 'Media'}</span></div>
+      <div class="detail">${esc(a.detail)}</div>
+      <div class="card-actions" style="margin-top:8px">
+        <button class="btn-sm btn-editar" onclick="resolverAlerta(${a.id})">Revisado</button>
+      </div>
+    </div>`).join('');
 
-async function cargarTodo() {
-  setSyncBar('● Sincronizando…', 'spin');
-  try {
-    [meds, lecturas] = await Promise.all([
-      apiFetch('/api/medicamentos'),
-      apiFetch('/api/presion')
-    ]);
-    // Defensa adicional: Postgres/Neon puede devolver columnas NUMERIC como texto.
-    // Si llegan como string, "stock + cantidad" concatena en vez de sumar. La API ya
-    // normaliza esto, pero se refuerza aquí para que nunca se rompa la aritmética.
-    meds = meds.map(m => ({
-      ...m,
-      stock: Number(m.stock) || 0,
-      consumo_diario: m.consumo_diario!=null ? Number(m.consumo_diario) : m.consumo_diario,
-    }));
-    setSyncBar('● Sincronizado', 'ok');
-    renderMeds();
-    renderPA();
-  } catch(e) {
-    setSyncBar('● Error de conexión', 'err');
+  if (!data.medications.length && !data.specialties.length) {
+    list.innerHTML = `<div class="empty"><div class="ico">💊</div>
+      <p><b>Sin datos todavía.</b><br>Esta app no trae datos incluidos.<br>Importa tu archivo JSON desde Más → Respaldo.</p>
+      <div style="margin-top:14px"><button class="btn-sm btn-tomar" onclick="dispararImport()">📥 Importar mis datos</button></div></div>`;
+    return;
   }
+  const vigentes = data.specialties.filter(s => s.status === 'vigente');
+  const noVigentes = data.specialties.filter(s => s.status === 'no_vigente');
+  const sinEsp = data.medications.filter(m => m.specialtyId == null);
+  let html = '';
+  const grupo = (spec, meds) => {
+    if (!meds.length) return '';
+    const prox = meds.filter(m => m.refillDate && m.status !== 'terminado' && m.status !== 'surtido')
+      .map(m => m.refillDate).sort()[0];
+    const proxTxt = prox ? ` · próximo: ${esc(fechaCorta(prox))} (${relResurtido(dayDiff(prox))})` : '';
+    return `<div class="group-title">${esc(spec.name)}</div>
+      <div class="group-sub">${meds.length} medicamento${meds.length === 1 ? '' : 's'}${proxTxt}</div>
+      <div class="med-list" style="padding-top:6px">${meds.sort(medSort).map(medCard).join('')}</div>`;
+  };
+  vigentes.forEach(s => { html += grupo(s, data.medications.filter(m => m.specialtyId === s.id)); });
+  if (sinEsp.length) html += grupo({ name: 'Sin especialidad' }, sinEsp);
+  if (noVigentes.length) {
+    const inner = noVigentes.map(s => {
+      const meds = data.medications.filter(m => m.specialtyId === s.id);
+      return meds.length ? grupo(s, meds)
+        : `<div class="group-title">${esc(s.name)}</div><div class="group-sub">Sin medicamentos</div>`;
+    }).join('');
+    if (inner) html += `<details class="group-closed"><summary>Especialidades no vigentes</summary>${inner}</details>`;
+  }
+  const sinFecha = data.medications.filter(m => !m.refillDate && m.status !== 'terminado');
+  if (sinFecha.length) {
+    html += `<div class="group-title">Sin fecha</div>
+      <div class="group-sub">Sin fecha estimada de resurtido</div>
+      <div class="med-list" style="padding-top:6px">${sinFecha.sort((a,b)=>a.name.localeCompare(b.name,'es')).map(medCard).join('')}</div>`;
+  }
+  const terminados = data.medications.filter(m => m.status === 'terminado');
+  if (terminados.length) {
+    html += `<details class="group-closed"><summary>Terminados (${terminados.length})</summary>
+      <div class="med-list" style="padding-top:6px">${terminados.sort(medSort).map(medCard).join('')}</div></details>`;
+  }
+  if (!html) html = '<div class="empty"><div class="ico">💊</div><p>Sin medicamentos.<br>Toca <strong>+</strong> para agregar.</p></div>';
+  list.innerHTML = html;
+}
+function resolverAlerta(id) {
+  const a = data.alerts.find(x => x.id === id);
+  if (a) { a.resolved = true; saveData(); renderResurtidos(); }
+}
+function setMedStatus(id, status) {
+  const m = data.medications.find(x => x.id === id);
+  if (m) { m.status = status; saveData(); renderAll(); }
+}
+function eliminarMed(id) {
+  const m = data.medications.find(x => x.id === id);
+  if (!m) return;
+  if (!confirm('¿Eliminar ' + m.name + '?')) return;
+  data.medications = data.medications.filter(x => x.id !== id);
+  saveData(); renderAll();
 }
 
-/* ── Cálculos medicamentos ── */
+/* ── Cálculos de consumo (misma lógica del original) ── */
+const consumosTomados = m => (m.historial || []).filter(x => x.tipo === 'tomar').sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
 function consumoPromedio(m) {
   const tomas = consumosTomados(m);
   if (m.consumo_variable) {
@@ -519,11 +806,10 @@ function consumoPromedio(m) {
   }
   return parseFloat(m.consumo_diario) || 0;
 }
-
 function diasRestantes(m) {
+  if (m.stock == null) return null;
   const c = consumoPromedio(m); return c ? Math.max(0, Math.floor(m.stock/c)) : null;
 }
-
 function resumenHistorial(m) {
   const u = m.unidades||'pastillas';
   const ult = consumosTomados(m).slice(0,3);
@@ -532,42 +818,133 @@ function resumenHistorial(m) {
   return `<div class="history">Últimos consumos: ${txt}</div>`;
 }
 
-/* ── Render medicamentos ── */
-function renderMeds() {
-  const list = $('med-list');
+/* ── Consumo ── */
+function renderConsumo() {
+  const list = $('consumo-list');
+  const meds = data.medications;
   if (!meds.length) {
-    list.innerHTML = '<div class="empty"><div class="ico">💊</div><p>Sin medicamentos.<br>Toca <strong>+</strong> para agregar.</p></div>'; return;
+    list.innerHTML = '<div class="empty"><div class="ico">📦</div><p>Sin medicamentos.<br>Importa tus datos o añade uno en Resurtidos.</p></div>';
+    return;
   }
   list.innerHTML = meds.map(m => {
-    const u=m.unidades||'pastillas', dias=diasRestantes(m), umbral=m.dias_aviso||10;
-    const consumo=consumoPromedio(m);
-    const pct=consumo?Math.max(0,Math.min(100,(m.stock/(consumo*(m.dias_recetados||30)))*100)):(m.stock>0?100:0);
-    const cls=dias===null?'':dias<=3?'danger':dias<=umbral?'warn':'';
-    const diasTxt=dias!==null?`${dias} días restantes`:m.consumo_variable?'sin datos aún':'—';
-    const alerta=cls==='danger'?' ⚠️':cls==='warn'?' 🔶':'';
-    const tag=m.consumo_variable?'<span class="tag">Variable</span>':'';
-    const consumoTxt=m.consumo_variable?(consumo?`Prom: ${consumo.toFixed(1)} ${u}/día`:'Prom: sin datos'):`${m.consumo_diario} ${u}/día`;
+    const u = m.unidades || 'pastillas';
+    if (m.stock == null) {
+      return `<div class="card-med">
+        <div class="nombre">${esc(m.name)}</div>
+        <div class="info">${esc(specialtyName(m.specialtyId))} · Sin stock registrado</div>
+        <div class="card-actions">
+          <button class="btn-sm btn-editar" onclick="abrirMed(${m.id},true)">Registrar stock</button>
+        </div></div>`;
+    }
+    const dias = diasRestantes(m), umbral = m.dias_aviso || 10;
+    const consumo = consumoPromedio(m);
+    const pct = consumo ? Math.max(0, Math.min(100, (m.stock/(consumo*(m.dias_recetados||30)))*100)) : (m.stock>0?100:0);
+    const cls = dias === null ? '' : dias <= 3 ? 'danger' : dias <= umbral ? 'warn' : '';
+    const diasTxt = dias !== null ? `${dias} días restantes` : m.consumo_variable ? 'sin datos aún' : '—';
+    const alerta = cls === 'danger' ? ' ⚠️' : cls === 'warn' ? ' 🔶' : '';
+    const tag = m.consumo_variable ? '<span class="tag">Variable</span>' : '';
+    const consumoTxt = m.consumo_variable ? (consumo ? `Prom: ${consumo.toFixed(1)} ${u}/día` : 'Prom: sin datos') : `${m.consumo_diario} ${u}/día`;
     const stockTxt = m.stock < 0 ? `<strong style="color:#ff3b30">0</strong>` : `<strong>${m.stock}</strong>`;
     const negNote = m.stock < 0
       ? `<div class="info" style="color:#ff3b30">⚠️ Se registró más consumo del stock disponible (faltan ${Math.abs(m.stock)} ${u} por justificar). Revisa el Historial.</div>`
       : '';
     return `<div class="card-med">
-      <div class="nombre">${m.nombre}${tag}${alerta}</div>
+      <div class="nombre">${esc(m.name)}${tag}${alerta}</div>
       <div class="info">Stock: ${stockTxt} ${u} · ${diasTxt} · ${consumoTxt}</div>
       ${negNote}
       <div class="progress"><div class="progress-bar ${cls}" style="width:${pct}%"></div></div>
       ${resumenHistorial(m)}
       <div class="card-actions">
-        <button class="btn-sm btn-tomar"       onclick="abrirAccion(${m.id},'tomar')">Tomar</button>
-        <button class="btn-sm btn-reabastecer"  onclick="abrirAccion(${m.id},'reabastecer')">Reabastecer</button>
-        <button class="btn-sm btn-historial"    onclick="verHistorial(${m.id})">Historial</button>
-        <button class="btn-sm btn-editar"       onclick="editarMed(${m.id})">Editar</button>
-        <button class="btn-sm btn-eliminar"     onclick="eliminarMed(${m.id})">Eliminar</button>
+        <button class="btn-sm btn-tomar" onclick="abrirAccion(${m.id},'tomar')">Tomar</button>
+        <button class="btn-sm btn-reabastecer" onclick="abrirAccion(${m.id},'reabastecer')">Reabastecer</button>
+        <button class="btn-sm btn-historial" onclick="verHistorial(${m.id})">Historial</button>
+        <button class="btn-sm btn-editar" onclick="abrirMed(${m.id},true)">Editar</button>
+        <button class="btn-sm btn-eliminar" onclick="eliminarMed(${m.id})">Eliminar</button>
       </div></div>`;
   }).join('');
 }
 
-/* ── Render Presión Arterial ── */
+/* ── Recetas ── */
+function renderRecetas() {
+  const list = $('recetas-list');
+  const recs = data.recipes;
+  if (!recs.length) {
+    list.innerHTML = '<div class="empty"><div class="ico">📄</div><p>Sin recetas.<br>Toca <strong>+</strong> para añadir una.</p></div>';
+    return;
+  }
+  const porFecha = (a,b) => (b.date||'').localeCompare(a.date||'');
+  let html = '';
+  const orden = [...data.specialties].sort((a,b) => (a.status === b.status ? a.id - b.id : a.status === 'vigente' ? -1 : 1));
+  orden.forEach(s => {
+    const rs = recs.filter(r => r.specialtyId === s.id).sort(porFecha);
+    if (!rs.length) return;
+    html += `<div class="group-title">${esc(s.name)}</div><div class="med-list" style="padding-top:6px">${rs.map(recetaCard).join('')}</div>`;
+  });
+  const sinEsp = recs.filter(r => r.specialtyId == null).sort(porFecha);
+  if (sinEsp.length) html += `<div class="group-title">Sin especialidad</div><div class="med-list" style="padding-top:6px">${sinEsp.map(recetaCard).join('')}</div>`;
+  list.innerHTML = html || '<div class="empty"><p>Sin recetas.</p></div>';
+}
+function recetaCard(r) {
+  const link = safeLink(r.link);
+  const diff = dayDiff(r.date);
+  const fechaTxt = r.date ? `${esc(fechaCorta(r.date))} · ${relFecha(diff)}` : 'Sin fecha';
+  return `<div class="card-med">
+    <div class="nombre">${esc(r.title)}</div>
+    <div class="info">${fechaTxt}</div>
+    ${r.note ? `<div class="note">${esc(r.note)}</div>` : ''}
+    ${r.file ? `<div class="filepath">${esc(r.file)}</div>` : ''}
+    <div class="card-actions link-row">
+      ${link ? `<a class="btn-sm btn-ver" href="${esc(link)}" target="_blank" rel="noopener">Ver receta</a>` : ''}
+      <button class="btn-sm btn-editar" onclick="abrirReceta(${r.id})">Editar</button>
+      <button class="btn-sm btn-eliminar" onclick="eliminarReceta(${r.id})">Eliminar</button>
+    </div></div>`;
+}
+function eliminarReceta(id) {
+  const r = data.recipes.find(x => x.id === id);
+  if (!r) return;
+  if (!confirm('¿Eliminar la receta "' + r.title + '"?')) return;
+  data.recipes = data.recipes.filter(x => x.id !== id);
+  saveData(); renderRecetas();
+}
+
+/* ── Citas ── */
+function renderCitas() {
+  const list = $('citas-list');
+  const cits = [...data.appointments].sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999'));
+  if (!cits.length) {
+    list.innerHTML = '<div class="empty"><div class="ico">📅</div><p>Sin citas.<br>Toca <strong>+</strong> para añadir una.</p></div>';
+    return;
+  }
+  list.innerHTML = cits.map(a => {
+    const meta = statusMeta(a.status);
+    const diff = dayDiff(a.date);
+    const fechaTxt = a.date ? `<b>${esc(fechaCorta(a.date))}</b> · ${relFecha(diff)}` : 'Sin fecha';
+    const accion = a.status === 'pendiente'
+      ? `<button class="btn-sm btn-surtido" onclick="setCitaStatus(${a.id},'realizada')">Realizada</button>`
+      : `<button class="btn-sm btn-editar" onclick="setCitaStatus(${a.id},'pendiente')">Volver a pendiente</button>`;
+    return `<div class="card-med">
+      <div class="nombre">${esc(a.title)}<span class="chip ${meta.cls}">${meta.label}</span></div>
+      <div class="info">${esc(specialtyName(a.specialtyId))} · ${fechaTxt}</div>
+      ${a.note ? `<div class="note">${esc(a.note)}</div>` : ''}
+      <div class="card-actions" style="margin-top:8px">${accion}
+        <button class="btn-sm btn-editar" onclick="abrirCita(${a.id})">Editar</button>
+        <button class="btn-sm btn-eliminar" onclick="eliminarCita(${a.id})">Eliminar</button>
+      </div></div>`;
+  }).join('');
+}
+function setCitaStatus(id, status) {
+  const a = data.appointments.find(x => x.id === id);
+  if (a) { a.status = status; saveData(); renderCitas(); }
+}
+function eliminarCita(id) {
+  const a = data.appointments.find(x => x.id === id);
+  if (!a) return;
+  if (!confirm('¿Eliminar la cita "' + a.title + '"?')) return;
+  data.appointments = data.appointments.filter(x => x.id !== id);
+  saveData(); renderCitas();
+}
+
+/* ── Presión arterial (misma lógica del original, datos locales) ── */
 function catInfo(cat) {
   const map = {
     'Normal':              { cls:'normal', dot:'dot-normal' },
@@ -579,39 +956,41 @@ function catInfo(cat) {
   };
   return map[cat] || { cls:'normal', dot:'dot-normal' };
 }
-
+function categoriaPAjs(sis, dia) {
+  if (sis > 180 || dia > 120) return 'Crisis hipertensiva';
+  if (sis >= 140 || dia >= 90) return 'Hipertensión 2';
+  if (sis >= 130 || dia >= 80) return 'Hipertensión 1';
+  if (sis >= 120 && dia < 80)  return 'Elevada';
+  if (sis < 90  || dia < 60)  return 'Hipotensión';
+  return 'Normal';
+}
 function renderPA() {
-  // Dashboard promedios (últimos 30 días)
+  const lecturas = data.pressure;
   const hace30 = Date.now() - 30*24*3600*1000;
   const recientes = lecturas.filter(l => parseFechaLocal(l.fecha).getTime() >= hace30);
   const avg = arr => arr.length ? Math.round(arr.reduce((s,v)=>s+v,0)/arr.length) : null;
   const avgSis  = avg(recientes.map(l=>l.sistolica));
   const avgDia  = avg(recientes.map(l=>l.diastolica));
   const avgFrec = avg(recientes.filter(l=>l.frecuencia).map(l=>l.frecuencia));
-
   $('pa-avg-sis').textContent  = avgSis  ?? '—';
   $('pa-avg-dia').textContent  = avgDia  ?? '—';
   $('pa-avg-frec').textContent = avgFrec ?? '—';
-
-  // Gráfica
   renderChart();
-
-  // Color del card sistólica según promedio
   if (avgSis && avgDia) {
     const cat = categoriaPAjs(avgSis, avgDia);
     const { cls } = catInfo(cat);
     $('pa-avg-sis').className = 'pa-val cat-' + cls;
     $('pa-avg-dia').className = 'pa-val cat-' + cls;
   }
-
-  // Lista
   const list = $('pa-list');
   if (!lecturas.length) {
-    list.innerHTML = '<div class="empty"><div class="ico">❤️</div><p>Sin registros.<br>Toca <strong>+</strong> para agregar.</p></div>'; return;
+    list.innerHTML = '<div class="empty"><div class="ico">❤️</div><p>Sin registros.<br>Toca <strong>+</strong> para agregar.</p></div>';
+    return;
   }
-  list.innerHTML = lecturas.map(l => {
-    const { cls, dot } = catInfo(l.categoria);
-    const momentoTxt = l.momento ? `${l.momento} · ` : '';
+  list.innerHTML = [...lecturas].sort((a,b) => parseFechaLocal(b.fecha) - parseFechaLocal(a.fecha) || (b.hora||'').localeCompare(a.hora||'')).map(l => {
+    const cat = l.categoria || categoriaPAjs(l.sistolica, l.diastolica);
+    const { cls, dot } = catInfo(cat);
+    const momentoTxt = l.momento ? `${esc(l.momento)} · ` : '';
     const horaTxt = l.hora ? `${horaCorta(l.hora)} · ` : '';
     const frecTxt = l.frecuencia ? ` · ${l.frecuencia} lpm` : '';
     return `<div class="pa-row" onclick="editarPA(${l.id})">
@@ -621,50 +1000,40 @@ function renderPA() {
           <span class="pa-vals">${l.sistolica}/${l.diastolica} <span>mmHg${frecTxt}</span></span>
           <button class="pa-del" onclick="event.stopPropagation();eliminarPA(${l.id})">×</button>
         </div>
-        <div class="pa-meta">${fechaCorta(l.fecha)} · ${horaTxt}${momentoTxt}<span class="pa-cat-txt cat-${cls}">${l.categoria}</span></div>
-        ${l.notas ? `<div class="pa-notas">${l.notas}</div>` : ''}
+        <div class="pa-meta">${esc(fechaCorta(l.fecha))} · ${horaTxt}${momentoTxt}<span class="pa-cat-txt cat-${cls}">${esc(cat)}</span></div>
+        ${l.notas ? `<div class="pa-notas">${esc(l.notas)}</div>` : ''}
       </div></div>`;
   }).join('');
 }
-
-/* ── Gráfica SVG de tendencia ── */
 function renderChart() {
   const container = $('pa-chart');
+  const lecturas = data.pressure;
   if (!lecturas.length) { container.innerHTML = ''; return; }
-
-  // Ordenar por fecha asc, últimas 20
-  const data = [...lecturas]
+  const data2 = [...lecturas]
     .sort((a,b) => parseFechaLocal(a.fecha) - parseFechaLocal(b.fecha) || (a.hora||'').localeCompare(b.hora||''))
     .slice(-20);
-  if (data.length < 2) { container.innerHTML = ''; return; }
-
+  if (data2.length < 2) { container.innerHTML = ''; return; }
   const W = container.clientWidth || 320;
   const H = 170;
   const padL = 36, padR = 10, padT = 12, padB = 28;
   const cw = W - padL - padR;
   const ch = H - padT - padB;
-
-  const allVals = [...data.map(d=>d.sistolica), ...data.map(d=>d.diastolica)];
+  const allVals = [...data2.map(d=>d.sistolica), ...data2.map(d=>d.diastolica)];
   const yRaw = Math.min(...allVals);
   const yMin = Math.max(40, yRaw - 10);
   const yMax = Math.min(230, Math.max(...allVals) + 15);
-
-  const xS = i => padL + (i / (data.length - 1)) * cw;
+  const xS = i => padL + (i / (data2.length - 1)) * cw;
   const yS = v => padT + ch - ((v - yMin) / (yMax - yMin)) * ch;
-
-  // Líneas de referencia
   const refs = [
     {v:140, c:'#c0392b', l:'140'},
     {v:120, c:'#e67e22', l:'120'},
     {v:90,  c:'#e67e22', l:'90'},
     {v:80,  c:'#27ae60', l:'80'},
   ].filter(r => r.v > yMin && r.v < yMax);
-
   const refLines = refs.map(r =>
     `<line x1="${padL}" y1="${yS(r.v).toFixed(1)}" x2="${padL+cw}" y2="${yS(r.v).toFixed(1)}" stroke="${r.c}" stroke-width="1" stroke-dasharray="4,3" opacity=".5"/>
      <text x="${padL-3}" y="${(yS(r.v)+4).toFixed(1)}" text-anchor="end" font-size="9" fill="${r.c}">${r.l}</text>`
   ).join('');
-
   const line = (arr, color) => {
     const pts = arr.map((v,i) => `${xS(i).toFixed(1)},${yS(v).toFixed(1)}`).join(' ');
     return `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity=".9"/>`;
@@ -672,24 +1041,21 @@ function renderChart() {
   const circles = (arr, color) => arr.map((v,i) =>
     `<circle cx="${xS(i).toFixed(1)}" cy="${yS(v).toFixed(1)}" r="3.5" fill="${color}" stroke="var(--surface)" stroke-width="1.5"/>`
   ).join('');
-
-  // Etiquetas X (máx 7)
-  const step = Math.ceil(data.length / 7);
-  const xLabels = data.map((d,i) => {
-    if (i % step !== 0 && i !== data.length-1) return '';
+  const step = Math.ceil(data2.length / 7);
+  const xLabels = data2.map((d,i) => {
+    if (i % step !== 0 && i !== data2.length-1) return '';
     const f = parseFechaLocal(d.fecha);
     const lbl = f.toLocaleDateString('es-MX', {day:'2-digit', month:'short'});
     return `<text x="${xS(i).toFixed(1)}" y="${H-6}" text-anchor="middle" font-size="9" fill="var(--sub)">${lbl}</text>`;
   }).join('');
-
   container.innerHTML =
-    `<div class="pa-chart-label">📈 Tendencia — últimas ${data.length} lecturas</div>
+    `<div class="pa-chart-label">📈 Tendencia — últimas ${data2.length} lecturas</div>
      <svg width="${W}" height="${H}" style="display:block;overflow:visible">
        ${refLines}
-       ${line(data.map(d=>d.sistolica), '#e74c3c')}
-       ${line(data.map(d=>d.diastolica), '#2980b9')}
-       ${circles(data.map(d=>d.sistolica), '#e74c3c')}
-       ${circles(data.map(d=>d.diastolica), '#2980b9')}
+       ${line(data2.map(d=>d.sistolica), '#e74c3c')}
+       ${line(data2.map(d=>d.diastolica), '#2980b9')}
+       ${circles(data2.map(d=>d.sistolica), '#e74c3c')}
+       ${circles(data2.map(d=>d.diastolica), '#2980b9')}
        ${xLabels}
      </svg>
      <div class="pa-chart-legend">
@@ -698,301 +1064,408 @@ function renderChart() {
      </div>`;
 }
 
-function categoriaPAjs(sis, dia) {
-  if (sis > 180 || dia > 120) return 'Crisis hipertensiva';
-  if (sis >= 140 || dia >= 90) return 'Hipertensión 2';
-  if (sis >= 130 || dia >= 80) return 'Hipertensión 1';
-  if (sis >= 120 && dia < 80)  return 'Elevada';
-  if (sis < 90  || dia < 60)  return 'Hipotensión';
-  return 'Normal';
-}
-
-/* ── FAB / Modal medicamentos ── */
-$('fab-meds').onclick = () => {
-  $('modal-med-title').textContent = 'Agregar medicamento';
-  ['med-id','med-nombre','med-stock','med-consumo','med-tomas','med-aviso','med-fecha','med-dias'].forEach(id=>$(id).value='');
-  $('med-unidades').value = 'pastillas';
-  $('med-variable').checked = false;
+/* ── Modal medicamento ── */
+let desdeMed = false; // true si la especialidad se abrió desde el modal de medicamento
+function abrirMed(id, soloStock) {
+  const m = id ? data.medications.find(x => x.id === id) : null;
+  $('modal-med-title').textContent = m ? 'Editar medicamento' : 'Agregar medicamento';
+  $('med-especialidad').innerHTML = specialtyOptions(m ? m.specialtyId : null);
+  $('med-id').value = m ? m.id : '';
+  $('med-nombre').value = m ? m.name : '';
+  $('med-dosis').value = m ? (m.dose || '') : '';
+  $('med-fecha-resurtido').value = m ? (m.refillDate || '') : '';
+  $('med-estado').value = m ? m.status : 'pendiente';
+  $('med-nota').value = m ? (m.note || '') : '';
+  $('med-stock').value = m && m.stock != null ? m.stock : '';
+  $('med-unidades').value = m ? (m.unidades || 'pastillas') : 'pastillas';
+  $('med-consumo').value = m && m.consumo_diario != null ? m.consumo_diario : '';
+  $('med-variable').checked = !!(m && m.consumo_variable);
+  $('med-tomas').value = m && m.tomas != null ? m.tomas : '';
+  $('med-aviso').value = m ? (m.dias_aviso || 10) : 10;
+  $('med-fecha').value = m ? (m.fecha_inicio || '') : '';
+  $('med-dias').value = m && m.dias_recetados != null ? m.dias_recetados : '';
   $('modal-med').classList.add('open');
-};
+  if (soloStock) setTimeout(() => $('med-stock').focus(), 100);
+}
+$('fab-resurtidos').onclick = () => abrirMed(null);
 $('btn-cancel-med').onclick = () => $('modal-med').classList.remove('open');
-
-function editarMed(id) {
-  const m = meds.find(x=>x.id===id); if(!m) return;
-  $('modal-med-title').textContent = 'Editar medicamento';
-  $('med-id').value        = m.id;
-  $('med-nombre').value    = m.nombre;
-  $('med-stock').value     = m.stock;
-  $('med-unidades').value  = m.unidades||'pastillas';
-  $('med-consumo').value   = m.consumo_diario;
-  $('med-variable').checked= !!m.consumo_variable;
-  $('med-tomas').value     = m.tomas;
-  $('med-aviso').value     = m.dias_aviso;
-  $('med-fecha').value     = m.fecha_inicio||'';
-  $('med-dias').value      = m.dias_recetados||'';
-  $('modal-med').classList.add('open');
-}
-
-$('btn-save-med').onclick = async () => {
-  const id = $('med-id').value;
-  const payload = {
-    nombre:           $('med-nombre').value.trim(),
-    stock:            parseFloat($('med-stock').value)||0,
-    unidades:         $('med-unidades').value.trim()||'pastillas',
-    consumo_diario:   parseFloat($('med-consumo').value)||1,
+$('btn-save-med').onclick = () => {
+  const id = $('med-id').value ? Number($('med-id').value) : null;
+  const nombre = $('med-nombre').value.trim();
+  if (!nombre) { alert('El nombre es obligatorio'); return; }
+  const stockVal = $('med-stock').value.trim();
+  const consumoVal = $('med-consumo').value.trim();
+  const espVal = $('med-especialidad').value;
+  const campos = {
+    name: nombre,
+    dose: $('med-dosis').value.trim() || null,
+    specialtyId: espVal === '' ? null : Number(espVal),
+    refillDate: $('med-fecha-resurtido').value || null,
+    status: $('med-estado').value,
+    note: $('med-nota').value.trim() || null,
+    stock: stockVal === '' ? null : Number(stockVal),
+    unidades: $('med-unidades').value.trim() || 'pastillas',
+    consumo_diario: consumoVal === '' ? null : Number(consumoVal),
     consumo_variable: $('med-variable').checked,
-    tomas:            parseInt($('med-tomas').value)||1,
-    dias_aviso:       parseInt($('med-aviso').value)||10,
-    fecha_inicio:     $('med-fecha').value||null,
-    dias_recetados:   parseInt($('med-dias').value)||null,
+    tomas: $('med-tomas').value.trim() === '' ? null : Number($('med-tomas').value),
+    dias_aviso: Number($('med-aviso').value) || 10,
+    fecha_inicio: $('med-fecha').value || null,
+    dias_recetados: $('med-dias').value.trim() === '' ? null : Number($('med-dias').value),
   };
-  if (!payload.nombre) { alert('El nombre es obligatorio'); return; }
-  try {
-    if (id) await apiFetch('/api/medicamentos','PATCH',{id:parseInt(id),...payload});
-    else    await apiFetch('/api/medicamentos','POST',payload);
-    $('modal-med').classList.remove('open');
-    cargarTodo();
-  } catch(e) { alert(e.message); }
+  if (id) {
+    const m = data.medications.find(x => x.id === id);
+    if (m) Object.assign(m, campos);
+  } else {
+    data.medications.push(Object.assign({ id: nextId(data.medications), historial: [] }, campos));
+  }
+  $('modal-med').classList.remove('open');
+  saveData(); renderAll();
 };
 
-/* ── Modal tomar/reabastecer ── */
-let accionEditIdx = null; // null = nueva captura; número = editando ese índice de m.historial
+/* ── Modal especialidad ── */
+function abrirEspecialidad() {
+  desdeMed = false;
+  $('modal-esp-title').textContent = 'Nueva especialidad';
+  $('esp-id').value = '';
+  $('esp-nombre').value = '';
+  $('esp-estado').value = 'vigente';
+  $('esp-nota').value = '';
+  $('modal-especialidad').classList.add('open');
+}
+function abrirEspecialidadDesdeMed() {
+  desdeMed = true;
+  $('modal-esp-title').textContent = 'Nueva especialidad';
+  $('esp-id').value = '';
+  $('esp-nombre').value = '';
+  $('esp-estado').value = 'vigente';
+  $('esp-nota').value = '';
+  $('modal-especialidad').classList.add('open');
+}
+$('btn-cancel-esp').onclick = () => $('modal-especialidad').classList.remove('open');
+$('btn-save-esp').onclick = () => {
+  const nombre = $('esp-nombre').value.trim();
+  if (!nombre) { alert('El nombre es obligatorio'); return; }
+  const nueva = {
+    id: nextId(data.specialties),
+    name: nombre,
+    status: $('esp-estado').value,
+    note: $('esp-nota').value.trim() || null
+  };
+  data.specialties.push(nueva);
+  $('modal-especialidad').classList.remove('open');
+  saveData(); renderAll();
+  if (desdeMed) {
+    $('med-especialidad').innerHTML = specialtyOptions(nueva.id);
+    desdeMed = false;
+  }
+};
 
+/* ── Modal tomar / reabastecer ── */
+let accionEditIdx = null;
 function abrirAccion(id, tipo) {
   accionEditIdx = null;
   $('btn-save-accion').textContent = 'Confirmar';
-  const m = meds.find(x=>x.id===id);
+  const m = data.medications.find(x => x.id === id);
+  if (!m || m.stock == null) { abrirMed(id, true); return; }
   $('accion-med-id').value = id; $('accion-tipo').value = tipo;
-  const esTomar = tipo==='tomar';
-  $('accion-title').textContent       = esTomar?`Tomar — ${m.nombre}`:`Reabastecer — ${m.nombre}`;
-  $('accion-label').textContent       = esTomar?`Cantidad (${m.unidades||'pastillas'})`:`Añadir (${m.unidades||'pastillas'})`;
-  $('accion-fecha-label').textContent = esTomar?'Fecha de consumo':'Fecha de reabastecimiento';
-  $('accion-momento-label').style.display = esTomar?'':'none';
-  $('accion-momento').style.display       = esTomar?'':'none';
+  const esTomar = tipo === 'tomar';
+  $('accion-title').textContent = esTomar ? `Tomar — ${m.name}` : `Reabastecer — ${m.name}`;
+  $('accion-label').textContent = esTomar ? `Cantidad (${m.unidades||'pastillas'})` : `Añadir (${m.unidades||'pastillas'})`;
+  $('accion-fecha-label').textContent = esTomar ? 'Fecha de consumo' : 'Fecha de reabastecimiento';
+  $('accion-momento-label').style.display = esTomar ? '' : 'none';
+  $('accion-momento').style.display = esTomar ? '' : 'none';
   $('accion-momento').value = '';
-  $('accion-cantidad').value = esTomar?(m.consumo_variable?'': (m.tomas||1)):30;
+  $('accion-cantidad').value = esTomar ? (m.consumo_variable ? '' : (m.tomas || 1)) : 30;
   $('accion-fecha').value = fechaLocal();
   $('modal-accion').classList.add('open');
 }
 $('btn-cancel-accion').onclick = () => { $('modal-accion').classList.remove('open'); accionEditIdx = null; };
-$('btn-save-accion').onclick = async () => {
-  const id=parseInt($('accion-med-id').value), tipo=$('accion-tipo').value;
-  const cant=parseFloat($('accion-cantidad').value);
-  if (!cant||cant<=0) { alert('Ingresa una cantidad válida'); return; }
-  const m=meds.find(x=>x.id===id); if(!m) return;
-  const fecha=$('accion-fecha').value||fechaLocal(), momento=$('accion-momento').value||'';
-  const hist=[...(m.historial||[])];
+$('btn-save-accion').onclick = () => {
+  const id = Number($('accion-med-id').value), tipo = $('accion-tipo').value;
+  const cant = parseFloat($('accion-cantidad').value);
+  if (!cant || cant <= 0) { alert('Ingresa una cantidad válida'); return; }
+  const m = data.medications.find(x => x.id === id); if (!m) return;
+  const fecha = $('accion-fecha').value || fechaLocal(), momento = $('accion-momento').value || '';
+  const hist = [...(m.historial || [])];
   let nuevoStock;
-
   if (accionEditIdx !== null && hist[accionEditIdx]) {
-    // Edición: se revierte el efecto de la cantidad anterior y se aplica la nueva.
-    // No se recorta a 0 aquí: el recorte solo es visual (diasRestantes), para que
-    // revertir o editar un registro posterior siga siendo exacto (ver eliminarConsumo).
     const anterior = hist[accionEditIdx];
-    const stockSinAnterior = anterior.tipo==='tomar' ? m.stock + anterior.cantidad : m.stock - anterior.cantidad;
-    nuevoStock = tipo==='tomar' ? (stockSinAnterior - cant) : (stockSinAnterior + cant);
-    hist[accionEditIdx] = { fecha:`${fecha}T12:00:00.000Z`, tipo, cantidad:cant, ...(momento&&{momento}) };
+    const stockSinAnterior = anterior.tipo === 'tomar' ? m.stock + anterior.cantidad : m.stock - anterior.cantidad;
+    nuevoStock = tipo === 'tomar' ? (stockSinAnterior - cant) : (stockSinAnterior + cant);
+    hist[accionEditIdx] = { fecha: `${fecha}T12:00:00.000Z`, tipo, cantidad: cant, ...(momento && { momento }) };
   } else {
-    nuevoStock = tipo==='tomar' ? (m.stock - cant) : (m.stock + cant);
-    hist.push({ fecha:`${fecha}T12:00:00.000Z`, tipo, cantidad:cant, ...(momento&&{momento}) });
+    nuevoStock = tipo === 'tomar' ? (m.stock - cant) : (m.stock + cant);
+    hist.push({ fecha: `${fecha}T12:00:00.000Z`, tipo, cantidad: cant, ...(momento && { momento }) });
   }
-
-  try {
-    await apiFetch('/api/medicamentos','PATCH',{id,stock:nuevoStock,historial:hist});
-    $('modal-accion').classList.remove('open');
-    accionEditIdx = null;
-    if (tipo==='tomar'&&nuevoStock<=0) alert(`⚠️ ¡${m.nombre} se agotó!`);
-    cargarTodo();
-  } catch(e) { alert(e.message); }
+  m.stock = nuevoStock;
+  m.historial = hist;
+  $('modal-accion').classList.remove('open');
+  accionEditIdx = null;
+  if (tipo === 'tomar' && nuevoStock <= 0) alert('⚠️ ¡' + m.name + ' se agotó!');
+  saveData(); renderAll();
 };
 
-/* ── Modal Historial (editar/eliminar registros individuales) ── */
+/* ── Modal historial ── */
 function verHistorial(id) {
-  const m = meds.find(x=>x.id===id); if(!m) return;
-  $('historial-med-nombre').textContent = m.nombre;
+  const m = data.medications.find(x => x.id === id); if (!m) return;
+  $('historial-med-nombre').textContent = m.name;
   $('historial-med-id').value = id;
-  const u = m.unidades||'pastillas';
-  const entradas = (m.historial||[]).map((e,idx)=>({...e,_idx:idx}))
-    .sort((a,b)=> new Date(b.fecha) - new Date(a.fecha));
+  const u = m.unidades || 'pastillas';
+  const entradas = (m.historial || []).map((e, idx) => Object.assign({}, e, { _idx: idx }))
+    .sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
   const list = $('historial-list');
   list.innerHTML = entradas.length ? entradas.map(e => {
-    const esTomar = e.tipo==='tomar';
-    const tipoTxt = esTomar?'Tomó':'Reabasteció';
-    const signo    = esTomar?'−':'+';
-    const cls      = esTomar?'hist-tomar':'hist-reabastecer';
+    const esTomar = e.tipo === 'tomar';
+    const tipoTxt = esTomar ? 'Tomó' : 'Reabasteció';
+    const signo = esTomar ? '−' : '+';
+    const cls = esTomar ? 'hist-tomar' : 'hist-reabastecer';
     return `<div class="hist-row">
       <div class="hist-row-body">
-        <div class="hist-row-top ${cls}">${tipoTxt} ${signo}${e.cantidad} ${u}</div>
-        <div class="hist-meta">${fechaCorta(e.fecha)}${e.momento?` · ${e.momento}`:''}</div>
+        <div class="hist-row-top ${cls}">${tipoTxt} ${signo}${e.cantidad} ${esc(u)}</div>
+        <div class="hist-meta">${esc(fechaCorta(e.fecha))}${e.momento ? ` · ${esc(e.momento)}` : ''}</div>
       </div>
       <div class="hist-row-actions">
         <button class="hist-edit" onclick="editarConsumo(${id},${e._idx})" title="Editar">✎</button>
-        <button class="hist-del"  onclick="eliminarConsumo(${id},${e._idx})" title="Eliminar">×</button>
+        <button class="hist-del" onclick="eliminarConsumo(${id},${e._idx})" title="Eliminar">×</button>
       </div></div>`;
   }).join('') : '<div class="empty"><p>Sin registros aún.</p></div>';
   $('modal-historial').classList.add('open');
 }
 $('btn-cerrar-historial').onclick = () => $('modal-historial').classList.remove('open');
-
 function editarConsumo(medId, idx) {
-  const m = meds.find(x=>x.id===medId); if(!m) return;
-  const e = (m.historial||[])[idx]; if(!e) return;
+  const m = data.medications.find(x => x.id === medId); if (!m) return;
+  const e = (m.historial || [])[idx]; if (!e) return;
   accionEditIdx = idx;
-  const esTomar = e.tipo==='tomar';
+  const esTomar = e.tipo === 'tomar';
   $('accion-med-id').value = medId; $('accion-tipo').value = e.tipo;
-  $('accion-title').textContent       = esTomar?`Editar toma — ${m.nombre}`:`Editar reabastecimiento — ${m.nombre}`;
-  $('accion-label').textContent       = esTomar?`Cantidad (${m.unidades||'pastillas'})`:`Añadir (${m.unidades||'pastillas'})`;
-  $('accion-fecha-label').textContent = esTomar?'Fecha de consumo':'Fecha de reabastecimiento';
-  $('accion-momento-label').style.display = esTomar?'':'none';
-  $('accion-momento').style.display       = esTomar?'':'none';
-  $('accion-momento').value  = e.momento||'';
+  $('accion-title').textContent = esTomar ? `Editar toma — ${m.name}` : `Editar reabastecimiento — ${m.name}`;
+  $('accion-label').textContent = esTomar ? `Cantidad (${m.unidades||'pastillas'})` : `Añadir (${m.unidades||'pastillas'})`;
+  $('accion-fecha-label').textContent = esTomar ? 'Fecha de consumo' : 'Fecha de reabastecimiento';
+  $('accion-momento-label').style.display = esTomar ? '' : 'none';
+  $('accion-momento').style.display = esTomar ? '' : 'none';
+  $('accion-momento').value = e.momento || '';
   $('accion-cantidad').value = e.cantidad;
-  $('accion-fecha').value    = (e.fecha||'').slice(0,10);
+  $('accion-fecha').value = (e.fecha || '').slice(0,10);
   $('btn-save-accion').textContent = 'Guardar cambios';
   $('modal-historial').classList.remove('open');
   $('modal-accion').classList.add('open');
 }
-
-async function eliminarConsumo(medId, idx) {
-  const m = meds.find(x=>x.id===medId); if(!m) return;
-  const e = (m.historial||[])[idx]; if(!e) return;
+function eliminarConsumo(medId, idx) {
+  const m = data.medications.find(x => x.id === medId); if (!m) return;
+  const e = (m.historial || [])[idx]; if (!e) return;
   if (!confirm('¿Eliminar este registro del historial?')) return;
-  const hist = (m.historial||[]).filter((_,i)=>i!==idx);
-  const nuevoStock = e.tipo==='tomar' ? (m.stock + e.cantidad) : (m.stock - e.cantidad);
-  try {
-    await apiFetch('/api/medicamentos','PATCH',{id:medId,stock:nuevoStock,historial:hist});
-    await cargarTodo();
-    verHistorial(medId);
-  } catch(err) { alert(err.message); }
+  const hist = (m.historial || []).filter((_, i) => i !== idx);
+  m.stock = e.tipo === 'tomar' ? (m.stock + e.cantidad) : (m.stock - e.cantidad);
+  m.historial = hist;
+  saveData(); renderAll();
+  verHistorial(medId);
 }
 
-async function eliminarMed(id) {
-  const m=meds.find(x=>x.id===id);
-  if (!confirm(`¿Eliminar ${m?.nombre}?`)) return;
-  try { await apiFetch('/api/medicamentos','DELETE',{id}); cargarTodo(); }
-  catch(e) { alert(e.message); }
+/* ── Modal receta ── */
+function abrirReceta(id) {
+  const r = id ? data.recipes.find(x => x.id === id) : null;
+  $('modal-receta-title').textContent = r ? 'Editar receta' : 'Añadir receta';
+  $('receta-especialidad').innerHTML = specialtyOptions(r ? r.specialtyId : null);
+  $('receta-id').value = r ? r.id : '';
+  $('receta-titulo').value = r ? r.title : '';
+  $('receta-fecha').value = r ? (r.date || '') : '';
+  $('receta-nota').value = r ? (r.note || '') : '';
+  $('receta-enlace').value = r ? (r.link || '') : '';
+  $('receta-archivo').value = r ? (r.file || '') : '';
+  $('modal-receta').classList.add('open');
 }
+$('fab-recetas').onclick = () => abrirReceta(null);
+$('btn-cancel-receta').onclick = () => $('modal-receta').classList.remove('open');
+$('btn-save-receta').onclick = () => {
+  const id = $('receta-id').value ? Number($('receta-id').value) : null;
+  const titulo = $('receta-titulo').value.trim();
+  if (!titulo) { alert('El título es obligatorio'); return; }
+  const enlace = $('receta-enlace').value.trim();
+  if (enlace && !safeLink(enlace)) { alert('El enlace debe empezar con http:// o https://'); return; }
+  const espVal = $('receta-especialidad').value;
+  const campos = {
+    title: titulo,
+    specialtyId: espVal === '' ? null : Number(espVal),
+    date: $('receta-fecha').value || null,
+    note: $('receta-nota').value.trim() || null,
+    link: enlace || null,
+    file: $('receta-archivo').value.trim() || null
+  };
+  if (id) {
+    const r = data.recipes.find(x => x.id === id);
+    if (r) Object.assign(r, campos);
+  } else {
+    data.recipes.push(Object.assign({ id: nextId(data.recipes) }, campos));
+  }
+  $('modal-receta').classList.remove('open');
+  saveData(); renderRecetas();
+};
 
-/* ── Modal Presión Arterial ── */
+/* ── Modal cita ── */
+function abrirCita(id) {
+  const a = id ? data.appointments.find(x => x.id === id) : null;
+  $('modal-cita-title').textContent = a ? 'Editar cita' : 'Añadir cita';
+  $('cita-especialidad').innerHTML = specialtyOptions(a ? a.specialtyId : null);
+  $('cita-id').value = a ? a.id : '';
+  $('cita-titulo').value = a ? a.title : '';
+  $('cita-fecha').value = a ? (a.date || '') : '';
+  $('cita-estado').value = a ? a.status : 'pendiente';
+  $('cita-nota').value = a ? (a.note || '') : '';
+  $('modal-cita').classList.add('open');
+}
+$('fab-citas').onclick = () => abrirCita(null);
+$('btn-cancel-cita').onclick = () => $('modal-cita').classList.remove('open');
+$('btn-save-cita').onclick = () => {
+  const id = $('cita-id').value ? Number($('cita-id').value) : null;
+  const titulo = $('cita-titulo').value.trim();
+  if (!titulo) { alert('El título es obligatorio'); return; }
+  const espVal = $('cita-especialidad').value;
+  const campos = {
+    title: titulo,
+    specialtyId: espVal === '' ? null : Number(espVal),
+    date: $('cita-fecha').value || null,
+    status: $('cita-estado').value,
+    note: $('cita-nota').value.trim() || null
+  };
+  if (id) {
+    const a = data.appointments.find(x => x.id === id);
+    if (a) Object.assign(a, campos);
+  } else {
+    data.appointments.push(Object.assign({ id: nextId(data.appointments) }, campos));
+  }
+  $('modal-cita').classList.remove('open');
+  saveData(); renderCitas();
+};
+
+/* ── Modal presión arterial ── */
 const horaLocal = (d = new Date()) => String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
-let paEditId = null; // null = registro nuevo; con valor = editando ese id
-
+let paEditId = null;
 $('fab-pa').onclick = () => {
   paEditId = null;
   $('modal-pa-titulo').textContent = '❤️ Registrar lectura';
   $('btn-save-pa').textContent = 'Guardar';
-  ['pa-sis','pa-dia','pa-frec','pa-notas'].forEach(id=>$(id).value='');
-  $('pa-fecha').value   = fechaLocal();
-  $('pa-hora').value    = horaLocal();
+  ['pa-sis','pa-dia','pa-frec','pa-notas'].forEach(id => $(id).value = '');
+  $('pa-fecha').value = fechaLocal();
+  $('pa-hora').value = horaLocal();
   $('pa-momento').value = '';
   $('modal-pa').classList.add('open');
 };
-
 function editarPA(id) {
-  const l = lecturas.find(x => x.id === id);
+  const l = data.pressure.find(x => x.id === id);
   if (!l) return;
   paEditId = id;
   $('modal-pa-titulo').textContent = '❤️ Editar lectura';
   $('btn-save-pa').textContent = 'Guardar cambios';
-  $('pa-fecha').value   = (l.fecha || '').slice(0,10) || fechaLocal();
-  $('pa-hora').value    = l.hora ? l.hora.slice(0,5) : '';
+  $('pa-fecha').value = (l.fecha || '').slice(0,10) || fechaLocal();
+  $('pa-hora').value = l.hora ? l.hora.slice(0,5) : '';
   $('pa-momento').value = l.momento || '';
-  $('pa-sis').value     = l.sistolica ?? '';
-  $('pa-dia').value     = l.diastolica ?? '';
-  $('pa-frec').value    = l.frecuencia ?? '';
-  $('pa-notas').value   = l.notas || '';
+  $('pa-sis').value = l.sistolica ?? '';
+  $('pa-dia').value = l.diastolica ?? '';
+  $('pa-frec').value = l.frecuencia ?? '';
+  $('pa-notas').value = l.notas || '';
   $('modal-pa').classList.add('open');
 }
-
 $('btn-cancel-pa').onclick = () => { $('modal-pa').classList.remove('open'); paEditId = null; };
-$('btn-save-pa').onclick = async () => {
-  const sis=parseInt($('pa-sis').value), dia=parseInt($('pa-dia').value);
-  if (!sis||!dia||sis<50||dia<30) { alert('Ingresa valores válidos de sistólica y diastólica'); return; }
+$('btn-save-pa').onclick = () => {
+  const sis = parseInt($('pa-sis').value), dia = parseInt($('pa-dia').value);
+  if (!sis || !dia || sis < 50 || dia < 30) { alert('Ingresa valores válidos de sistólica y diastólica'); return; }
   const payload = {
-    fecha:      $('pa-fecha').value||fechaLocal(),
-    momento:    $('pa-momento').value||'',
-    hora:       $('pa-hora').value||'',
+    fecha: $('pa-fecha').value || fechaLocal(),
+    momento: $('pa-momento').value || '',
+    hora: $('pa-hora').value || '',
     sistolica: sis, diastolica: dia,
-    frecuencia: parseInt($('pa-frec').value)||null,
-    notas:     $('pa-notas').value||'',
+    frecuencia: parseInt($('pa-frec').value) || null,
+    notas: $('pa-notas').value || '',
+    categoria: categoriaPAjs(sis, dia)
   };
-  try {
-    if (paEditId) {
-      await apiFetch('/api/presion','PUT',{ id: paEditId, ...payload });
-    } else {
-      await apiFetch('/api/presion','POST', payload);
-    }
-    $('modal-pa').classList.remove('open');
-    paEditId = null;
-    cargarTodo();
-  } catch(e) { alert(e.message); }
+  if (paEditId) {
+    const l = data.pressure.find(x => x.id === paEditId);
+    if (l) Object.assign(l, payload);
+  } else {
+    data.pressure.push(Object.assign({ id: nextId(data.pressure) }, payload));
+  }
+  $('modal-pa').classList.remove('open');
+  paEditId = null;
+  saveData(); renderPA();
 };
-
-async function eliminarPA(id) {
+function eliminarPA(id) {
   if (!confirm('¿Eliminar este registro?')) return;
-  try { await apiFetch('/api/presion','DELETE',{id}); cargarTodo(); }
-  catch(e) { alert(e.message); }
+  data.pressure = data.pressure.filter(x => x.id !== id);
+  saveData(); renderPA();
 }
 
-/* ── Cambiar contraseña ── */
-$('btn-cambiar-pass').onclick = () => {
-  $('pass-actual').value=$('pass-nueva').value=$('pass-confirmar').value='';
-  $('pass-error').textContent='';
-  $('modal-pass').classList.add('open');
-};
-$('btn-cancel-pass').onclick = () => $('modal-pass').classList.remove('open');
-$('btn-save-pass').onclick = async () => {
-  const actual=$('pass-actual').value, nueva=$('pass-nueva').value, conf=$('pass-confirmar').value;
-  $('pass-error').textContent='';
-  if (!actual||!nueva||!conf){$('pass-error').textContent='Completa todos los campos';return;}
-  if (nueva!==conf){$('pass-error').textContent='Las contraseñas no coinciden';return;}
-  if (nueva.length<4){$('pass-error').textContent='Mínimo 4 caracteres';return;}
-  try {
-    await apiFetch('/api/auth','POST',{action:'change-password',password:actual,new_password:nueva});
-    $('modal-pass').classList.remove('open');
-    alert('✅ Contraseña cambiada');
-  } catch(e){$('pass-error').textContent=e.message;}
-};
-
-/* ── Logout ── */
-$('btn-logout').onclick = () => {
-  localStorage.removeItem('med_token'); localStorage.removeItem('med_user');
-  $('app').style.display='none'; $('auth').style.display='flex';
-  $('auth-email').value=$('auth-pass').value='';
-};
-
-/* ── Exportar / Importar ── */
+/* ── Respaldo: exportar / importar ── */
+function descargar(nombre, contenido, tipo) {
+  const blob = new Blob([contenido], { type: tipo });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = nombre;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
 $('btn-export').onclick = () => {
-  const blob=new Blob([JSON.stringify(meds,null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download=`medicamentos-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  const copia = Object.assign({}, data, { exportedAt: fechaLocal() });
+  descargar(`resurtidos-${fechaLocal()}.json`, JSON.stringify(copia, null, 2), 'application/json');
 };
 $('btn-export-pa').onclick = () => {
-  // Exportar como CSV
-  const header='Fecha,Hora,Momento,Sistólica,Diastólica,Frecuencia,Categoría,Notas\n';
-  const rows=lecturas.map(l=>[(l.fecha||'').slice(0,10),horaCorta(l.hora),l.momento||'',l.sistolica,l.diastolica,l.frecuencia||'',l.categoria,l.notas||''].join(',')).join('\n');
-  const blob=new Blob([header+rows],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download=`presion-arterial-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  const header = 'Fecha,Hora,Momento,Sistólica,Diastólica,Frecuencia,Categoría,Notas\n';
+  const rows = data.pressure.map(l => [(l.fecha||'').slice(0,10), horaCorta(l.hora), l.momento||'', l.sistolica, l.diastolica, l.frecuencia||'', l.categoria || categoriaPAjs(l.sistolica, l.diastolica), (l.notas||'').replace(/,/g,';')].join(',')).join('\n');
+  descargar(`presion-arterial-${fechaLocal()}.csv`, header + rows, 'text/csv;charset=utf-8');
 };
-$('btn-import-trigger').onclick = () => $('import-file').click();
+function dispararImport() { $('import-file').click(); }
+$('btn-import-trigger').onclick = dispararImport;
 $('import-file').onchange = async e => {
-  const file=e.target.files[0]; if(!file) return;
+  const file = e.target.files[0]; if (!file) return;
   try {
-    const data=JSON.parse(await file.text());
-    if (!Array.isArray(data)) throw new Error('Formato inválido');
-    for (const m of data) {
-      const {id,user_id,created_at,...campos}=m;
-      await apiFetch('/api/medicamentos','POST',campos);
+    const parsed = JSON.parse(await file.text());
+    const normalizado = normalizeImport(parsed);
+    const resumen = `${normalizado.medications.length} medicamentos, ${normalizado.specialties.length} especialidades, ${normalizado.recipes.length} recetas, ${normalizado.appointments.length} citas, ${normalizado.pressure.length} lecturas de presión.`;
+    if (!confirm('Importar estos datos y REEMPLAZAR los datos actuales?\n\n' + resumen)) { e.target.value = ''; return; }
+    data = normalizado;
+    saveData(); renderAll();
+    alert('Importación completada: ' + resumen);
+  } catch (err) {
+    alert('Error al importar: ' + err.message);
+  }
+  e.target.value = '';
+};
+
+/* ── Avisos en este dispositivo ── */
+$('btn-test-aviso').onclick = () => {
+  const estado = $('aviso-status');
+  if (!('Notification' in window)) {
+    estado.textContent = 'Este navegador no admite avisos. Los avisos solo se muestran con la app abierta; con la app cerrada no están garantizados.';
+    return;
+  }
+  Notification.requestPermission().then(permiso => {
+    if (permiso !== 'granted') {
+      estado.textContent = 'Permiso de avisos no concedido. Los avisos solo se muestran con la app abierta; con la app cerrada no están garantizados.';
+      return;
     }
-    alert('Importación completada'); cargarTodo();
-  } catch(e) { alert('Error al importar: '+e.message); }
-  e.target.value='';
+    try {
+      new Notification('Resurtidos — aviso de prueba', { body: 'Si ves este aviso, los avisos en este dispositivo funcionan con la app abierta.' });
+      estado.textContent = 'Aviso de prueba enviado. Recuerda: con la app cerrada no están garantizados.';
+    } catch (err) {
+      estado.textContent = 'No se pudo mostrar el aviso en este dispositivo.';
+    }
+  });
+};
+
+/* ── Borrar todos los datos ── */
+$('btn-borrar-todo').onclick = () => {
+  if (!confirm('¿Borrar TODOS los datos de este dispositivo? Esta acción no se puede deshacer. Exporta primero si quieres conservarlos.')) return;
+  if (!confirm('Confirmar de nuevo: se borrarán medicamentos, recetas, citas, alertas y presión arterial.')) return;
+  localStorage.removeItem(KEY);
+  data = emptyData();
+  renderAll();
+  alert('Datos borrados.');
 };
 
 /* ── Inicio ── */
-if (token()) iniciarApp();
-else $('auth').style.display='flex';
+applyTheme(localStorage.getItem('med_dark') === '1');
+loadData();
+renderAll();
+switchTab('resurtidos');
 </script>
 </body>
 </html>
