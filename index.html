@@ -236,7 +236,7 @@ details.group-closed summary{cursor:pointer;font-size:14px;font-weight:700;paddi
         <summary>📖 Guía rápida de uso</summary>
         <div class="settings-note">
           <b>Primer uso:</b> Más → Respaldo → Importar, y elige el archivo datos-resurtidos.json.<br>
-          <b>Resurtidos:</b> cada medicamento muestra su fecha estimada. <i>Ya lo pedí</i> cuando lo solicitas, <i>Surtido</i> cuando lo tienes en mano. <i>Suspender</i> lo aparta temporalmente y <i>Reanudar</i> lo regresa. <i>Editar</i> corrige dosis, fecha, estado o nota.<br>
+          <b>Resurtidos:</b> solo se muestran los resurtidos a 7 días o menos (y los vencidos); los demás aparecen una semana antes. Cada medicamento muestra su fecha estimada. <i>Ya lo pedí</i> cuando lo solicitas, <i>Surtido</i> cuando lo tienes en mano. <i>Suspender</i> lo aparta temporalmente y <i>Reanudar</i> lo regresa. <i>Editar</i> corrige dosis, fecha, estado o nota.<br>
           <b>Consumo:</b> solo aparecen los medicamentos con seguimiento activado. Con ＋ Agregar activas uno escondido o creas uno nuevo. <i>Tomar</i> y <i>Reabastecer</i> actualizan el stock y los días restantes.<br>
           <b>Recetas:</b> toca el enlace para abrir la receta en Dropbox, sin duplicar el archivo.<br>
           <b>Citas:</b> tus controles y revaloraciones, con fecha y especialidad.<br>
@@ -783,9 +783,14 @@ function renderResurtidos() {
       <div style="margin-top:14px"><button class="btn-sm btn-tomar" onclick="dispararImport()">📥 Importar mis datos</button></div></div>`;
     return;
   }
+  // Solo consumo (seguimiento sin fecha ni especialidad) no vive en Resurtidos, sino en Consumo.
+  // Y solo se muestran los resurtidos a 7 días o menos (y los vencidos); el resto aparece una semana antes.
+  const esSoloConsumo = m => m.seguimiento_consumo && !m.refillDate && m.specialtyId == null;
+  const base = data.medications.filter(m => !esSoloConsumo(m));
+  const medsR = base.filter(m => !m.refillDate || dayDiff(m.refillDate) <= 7);
   const vigentes = data.specialties.filter(s => s.status === 'vigente');
   const noVigentes = data.specialties.filter(s => s.status === 'no_vigente');
-  const sinEsp = data.medications.filter(m => m.specialtyId == null);
+  const sinEsp = medsR.filter(m => m.specialtyId == null);
   let html = '';
   const grupo = (spec, meds) => {
     if (!meds.length) return '';
@@ -796,33 +801,29 @@ function renderResurtidos() {
       <div class="group-sub">${meds.length} medicamento${meds.length === 1 ? '' : 's'}${proxTxt}</div>
       <div class="med-list" style="padding-top:6px">${meds.sort(medSort).map(medCard).join('')}</div>`;
   };
-  vigentes.forEach(s => { html += grupo(s, data.medications.filter(m => m.specialtyId === s.id)); });
+  vigentes.forEach(s => { html += grupo(s, medsR.filter(m => m.specialtyId === s.id)); });
   if (sinEsp.length) html += grupo({ name: 'Sin especialidad' }, sinEsp);
   if (noVigentes.length) {
     const inner = noVigentes.map(s => {
-      const meds = data.medications.filter(m => m.specialtyId === s.id);
+      const meds = medsR.filter(m => m.specialtyId === s.id);
       return meds.length ? grupo(s, meds)
         : `<div class="group-title">${esc(s.name)} <button class="btn-sm btn-editar" style="margin-left:8px" onclick="abrirEspecialidad(${s.id})">Editar</button></div><div class="group-sub">Sin medicamentos</div>`;
     }).join('');
     if (inner) html += `<details class="group-closed"><summary>Especialidades no vigentes</summary>${inner}</details>`;
   }
-  const sinFecha = data.medications.filter(m => !m.refillDate && m.status !== 'terminado' && m.status !== 'suspendido');
-  if (sinFecha.length) {
-    html += `<div class="group-title">Sin fecha</div>
-      <div class="group-sub">Sin fecha estimada de resurtido</div>
-      <div class="med-list" style="padding-top:6px">${sinFecha.sort((a,b)=>a.name.localeCompare(b.name,'es')).map(medCard).join('')}</div>`;
-  }
-  const terminados = data.medications.filter(m => m.status === 'terminado');
+  const terminados = base.filter(m => m.status === 'terminado');
   if (terminados.length) {
     html += `<details class="group-closed"><summary>Terminados (${terminados.length})</summary>
       <div class="med-list" style="padding-top:6px">${terminados.sort(medSort).map(medCard).join('')}</div></details>`;
   }
-  const suspendidos = data.medications.filter(m => m.status === 'suspendido');
+  const suspendidos = base.filter(m => m.status === 'suspendido');
   if (suspendidos.length) {
     html += `<details class="group-closed"><summary>Suspendidos (${suspendidos.length})</summary>
       <div class="med-list" style="padding-top:6px">${suspendidos.sort(medSort).map(medCard).join('')}</div></details>`;
   }
-  if (!html) html = '<div class="empty"><div class="ico">💊</div><p>Sin medicamentos.<br>Toca <strong>+</strong> para agregar.</p></div>';
+  if (!html) html = data.medications.length
+    ? '<div class="empty"><div class="ico">💊</div><p>Nada próximo por ahora.<br>Los resurtidos aparecen una semana antes de su fecha estimada.</p></div>'
+    : '<div class="empty"><div class="ico">💊</div><p>Sin medicamentos.<br>Toca <strong>+</strong> para agregar.</p></div>';
   list.innerHTML = html;
 }
 function resolverAlerta(id) {
