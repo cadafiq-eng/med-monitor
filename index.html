@@ -748,7 +748,7 @@ function renderResurtidos() {
     const prox = meds.filter(m => m.refillDate && m.status !== 'terminado' && m.status !== 'surtido')
       .map(m => m.refillDate).sort()[0];
     const proxTxt = prox ? ` · próximo: ${esc(fechaCorta(prox))} (${relResurtido(dayDiff(prox))})` : '';
-    return `<div class="group-title">${esc(spec.name)}</div>
+    return `<div class="group-title">${esc(spec.name)}${spec.id != null ? ` <button class="btn-sm btn-editar" style="margin-left:8px" onclick="abrirEspecialidad(${spec.id})">Editar</button>` : ''}</div>
       <div class="group-sub">${meds.length} medicamento${meds.length === 1 ? '' : 's'}${proxTxt}</div>
       <div class="med-list" style="padding-top:6px">${meds.sort(medSort).map(medCard).join('')}</div>`;
   };
@@ -758,7 +758,7 @@ function renderResurtidos() {
     const inner = noVigentes.map(s => {
       const meds = data.medications.filter(m => m.specialtyId === s.id);
       return meds.length ? grupo(s, meds)
-        : `<div class="group-title">${esc(s.name)}</div><div class="group-sub">Sin medicamentos</div>`;
+        : `<div class="group-title">${esc(s.name)} <button class="btn-sm btn-editar" style="margin-left:8px" onclick="abrirEspecialidad(${s.id})">Editar</button></div><div class="group-sub">Sin medicamentos</div>`;
     }).join('');
     if (inner) html += `<details class="group-closed"><summary>Especialidades no vigentes</summary>${inner}</details>`;
   }
@@ -1123,13 +1123,14 @@ $('btn-save-med').onclick = () => {
 };
 
 /* ── Modal especialidad ── */
-function abrirEspecialidad() {
+function abrirEspecialidad(id) {
   desdeMed = false;
-  $('modal-esp-title').textContent = 'Nueva especialidad';
-  $('esp-id').value = '';
-  $('esp-nombre').value = '';
-  $('esp-estado').value = 'vigente';
-  $('esp-nota').value = '';
+  const s = id != null ? data.specialties.find(x => x.id === id) : null;
+  $('modal-esp-title').textContent = s ? 'Editar especialidad' : 'Nueva especialidad';
+  $('esp-id').value = s ? s.id : '';
+  $('esp-nombre').value = s ? s.name : '';
+  $('esp-estado').value = s ? s.status : 'vigente';
+  $('esp-nota').value = s ? (s.note || '') : '';
   $('modal-especialidad').classList.add('open');
 }
 function abrirEspecialidadDesdeMed() {
@@ -1145,19 +1146,29 @@ $('btn-cancel-esp').onclick = () => $('modal-especialidad').classList.remove('op
 $('btn-save-esp').onclick = () => {
   const nombre = $('esp-nombre').value.trim();
   if (!nombre) { alert('El nombre es obligatorio'); return; }
-  const nueva = {
-    id: nextId(data.specialties),
-    name: nombre,
-    status: $('esp-estado').value,
-    note: $('esp-nota').value.trim() || null
-  };
-  data.specialties.push(nueva);
+  const idVal = $('esp-id').value;
+  if (idVal) {
+    const s = data.specialties.find(x => x.id === Number(idVal));
+    if (s) {
+      s.name = nombre;
+      s.status = $('esp-estado').value;
+      s.note = $('esp-nota').value.trim() || null;
+    }
+  } else {
+    const nueva = {
+      id: nextId(data.specialties),
+      name: nombre,
+      status: $('esp-estado').value,
+      note: $('esp-nota').value.trim() || null
+    };
+    data.specialties.push(nueva);
+    if (desdeMed) {
+      $('med-especialidad').innerHTML = specialtyOptions(nueva.id);
+      desdeMed = false;
+    }
+  }
   $('modal-especialidad').classList.remove('open');
   saveData(); renderAll();
-  if (desdeMed) {
-    $('med-especialidad').innerHTML = specialtyOptions(nueva.id);
-    desdeMed = false;
-  }
 };
 
 /* ── Modal tomar / reabastecer ── */
