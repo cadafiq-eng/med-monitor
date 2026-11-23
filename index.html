@@ -109,6 +109,19 @@ body.dark .chip-realizada{background:#14532d;color:#7ee2a8}
 .alert-card .nombre{font-size:15px;font-weight:700;margin-bottom:4px}
 .alert-card .detail{font-size:12px;color:var(--sub);line-height:1.45}
 .toolbar{padding:12px 14px 0;display:flex;gap:8px}
+
+/* ── Inicio (portada) ── */
+.hero{text-align:center;padding:26px 16px 6px}
+.hero-ico{font-size:46px;line-height:1}
+.hero h1{margin:8px 0 4px;font-size:26px}
+.hero-sub{color:var(--sub);font-size:14px;margin:0}
+.hero-resumen{margin:14px auto 0;max-width:340px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:14px;box-shadow:var(--card-shadow)}
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+.home-card{display:flex;flex-direction:column;align-items:center;gap:4px;padding:18px 8px;border:1px solid var(--border);border-radius:14px;background:var(--surface);cursor:pointer;box-shadow:var(--card-shadow);color:var(--text);font-family:inherit}
+.home-card.wide{grid-column:1/-1;flex-direction:row;justify-content:center;gap:10px;padding:14px}
+.home-ico{font-size:28px;line-height:1}
+.home-titulo{font-weight:700;font-size:15px}
+.home-sub{font-size:12px;color:var(--sub);text-align:center}
 details.group-closed{margin:0 14px}
 details.group-closed summary{cursor:pointer;font-size:14px;font-weight:700;padding:12px 0;color:var(--sub)}
 .link-row{margin-top:8px}
@@ -189,8 +202,37 @@ details.group-closed summary{cursor:pointer;font-size:14px;font-weight:700;paddi
   </header>
   <div class="sync-bar ok" id="status-bar">● Guardado en este dispositivo</div>
 
+  <!-- TAB: Inicio -->
+  <div class="tab-section active" id="tab-inicio">
+    <div class="hero">
+      <div class="hero-ico">💊</div>
+      <h1>Resurtidos</h1>
+      <p class="hero-sub">Tus medicamentos y resurtidos, solo en este dispositivo.</p>
+      <div class="hero-resumen" id="hero-resumen"></div>
+    </div>
+    <div class="home-grid">
+      <button class="home-card" onclick="switchTab('resurtidos')"><span class="home-ico">💊</span><span class="home-titulo">Resurtidos</span><span class="home-sub" id="home-sub-resurtidos"></span></button>
+      <button class="home-card" onclick="switchTab('consumo')"><span class="home-ico">📦</span><span class="home-titulo">Consumo</span><span class="home-sub">Stock y tomas</span></button>
+      <button class="home-card" onclick="switchTab('recetas')"><span class="home-ico">📄</span><span class="home-titulo">Recetas</span><span class="home-sub">Enlaces a Dropbox</span></button>
+      <button class="home-card" onclick="switchTab('citas')"><span class="home-ico">📅</span><span class="home-titulo">Citas</span><span class="home-sub" id="home-sub-citas"></span></button>
+      <button class="home-card wide" onclick="irARespaldo()"><span class="home-ico">💾</span><span class="home-titulo">Respaldo</span><span class="home-sub">Exportar / importar datos</span></button>
+    </div>
+    <details class="group-closed">
+      <summary>📖 Guía rápida de uso</summary>
+      <div class="settings-note">
+        <b>Primer uso:</b> Más → Respaldo → Importar, y elige el archivo datos-resurtidos.json.<br>
+        <b>Resurtidos:</b> solo se muestran los resurtidos a 7 días o menos (y los vencidos); los demás aparecen una semana antes. Cada medicamento muestra su fecha estimada. <i>Ya lo pedí</i> cuando lo solicitas, <i>Surtido</i> cuando lo tienes en mano. <i>Suspender</i> lo aparta temporalmente y <i>Reanudar</i> lo regresa. <i>Editar</i> corrige dosis, fecha, estado o nota.<br>
+        <b>Consumo:</b> solo aparecen los medicamentos con seguimiento activado. Con ＋ Agregar activas uno escondido o creas uno nuevo. <i>Tomar</i> y <i>Reabastecer</i> actualizan el stock y los días restantes.<br>
+        <b>Recetas:</b> toca el enlace para abrir la receta en Dropbox, sin duplicar el archivo.<br>
+        <b>Citas:</b> tus controles y revaloraciones, con fecha y especialidad.<br>
+        <b>Más:</b> presión arterial con promedios y gráfica, respaldo (exportar / importar) y avisos en este dispositivo (solo suenan con la app abierta).<br>
+        <b>Respaldo:</b> exporta de vez en cuando. Tus datos viven solo en este dispositivo.
+      </div>
+    </details>
+  </div>
+
   <!-- TAB: Resurtidos -->
-  <div class="tab-section active" id="tab-resurtidos">
+  <div class="tab-section" id="tab-resurtidos">
     <div id="alertas-list"></div>
     <div class="toolbar">
       <button class="btn-sm btn-editar" onclick="abrirEspecialidad()">＋ Nueva especialidad</button>
@@ -232,19 +274,7 @@ details.group-closed summary{cursor:pointer;font-size:14px;font-weight:700;paddi
       🔴 HT2 ≥140/90 &nbsp;|&nbsp; 🚨 Crisis &gt;180/120 &nbsp;|&nbsp; 🔵 Hipotensión &lt;90/60
     </div>
     <div class="settings-list">
-      <details class="group-closed">
-        <summary>📖 Guía rápida de uso</summary>
-        <div class="settings-note">
-          <b>Primer uso:</b> Más → Respaldo → Importar, y elige el archivo datos-resurtidos.json.<br>
-          <b>Resurtidos:</b> solo se muestran los resurtidos a 7 días o menos (y los vencidos); los demás aparecen una semana antes. Cada medicamento muestra su fecha estimada. <i>Ya lo pedí</i> cuando lo solicitas, <i>Surtido</i> cuando lo tienes en mano. <i>Suspender</i> lo aparta temporalmente y <i>Reanudar</i> lo regresa. <i>Editar</i> corrige dosis, fecha, estado o nota.<br>
-          <b>Consumo:</b> solo aparecen los medicamentos con seguimiento activado. Con ＋ Agregar activas uno escondido o creas uno nuevo. <i>Tomar</i> y <i>Reabastecer</i> actualizan el stock y los días restantes.<br>
-          <b>Recetas:</b> toca el enlace para abrir la receta en Dropbox, sin duplicar el archivo.<br>
-          <b>Citas:</b> tus controles y revaloraciones, con fecha y especialidad.<br>
-          <b>Más:</b> presión arterial con promedios y gráfica, respaldo (exportar / importar) y avisos en este dispositivo (solo suenan con la app abierta).<br>
-          <b>Respaldo:</b> exporta de vez en cuando. Tus datos viven solo en este dispositivo.
-        </div>
-      </details>
-      <div class="settings-section">
+      <div class="settings-section" id="respaldo-section">
         <h3>Respaldo</h3>
         <button class="settings-btn" id="btn-export">📤 Exportar todos los datos (JSON)</button>
         <button class="settings-btn" id="btn-import-trigger">📥 Importar datos (JSON)</button>
@@ -272,7 +302,10 @@ details.group-closed summary{cursor:pointer;font-size:14px;font-weight:700;paddi
 
   <!-- Tab bar -->
   <div class="tab-bar">
-    <button class="tab-btn active" data-tab="resurtidos">
+    <button class="tab-btn active" data-tab="inicio">
+      <span class="tab-ico">🏠</span>Inicio
+    </button>
+    <button class="tab-btn" data-tab="resurtidos">
       <span class="tab-ico">💊</span>Resurtidos
     </button>
     <button class="tab-btn" data-tab="consumo">
@@ -714,9 +747,29 @@ function switchTab(tab) {
   $('fab-recetas').style.display    = tab === 'recetas'    ? 'flex' : 'none';
   $('fab-citas').style.display      = tab === 'citas'      ? 'flex' : 'none';
   $('fab-pa').style.display         = tab === 'mas'        ? 'flex' : 'none';
-  const titles = { resurtidos:'💊 Resurtidos', consumo:'📦 Consumo', recetas:'📄 Recetas', citas:'📅 Citas', mas:'⚙️ Más' };
+  const titles = { inicio:'🏠 Inicio', resurtidos:'💊 Resurtidos', consumo:'📦 Consumo', recetas:'📄 Recetas', citas:'📅 Citas', mas:'⚙️ Más' };
   $('header-title').textContent = titles[tab];
+  if (tab === 'inicio') renderInicio();
   if (tab === 'mas') renderPA();
+}
+
+function renderInicio() {
+  const esSoloConsumo = m => m.seguimiento_consumo && !m.refillDate && m.specialtyId == null;
+  const prox = data.medications.filter(m => !esSoloConsumo(m) && m.status !== 'terminado' && m.status !== 'suspendido' && (!m.refillDate || dayDiff(m.refillDate) <= 7));
+  const citasFut = data.appointments.filter(a => !a.date || dayDiff(a.date) >= 0).sort((a,b) => (a.date || '9999').localeCompare(b.date || '9999'));
+  const proxCita = citasFut[0];
+  if (!data.medications.length && !data.appointments.length) {
+    $('hero-resumen').innerHTML = 'Sin datos todavía.<br>Importa tu archivo JSON desde Respaldo para empezar.';
+  } else {
+    $('hero-resumen').innerHTML = `💊 ${prox.length} resurtido${prox.length === 1 ? '' : 's'} próximo${prox.length === 1 ? '' : 's'}${proxCita ? `<br>📅 Próxima cita: ${esc(fechaCorta(proxCita.date))} · ${esc(specialtyName(proxCita.specialtyId))}` : '<br>📅 Sin citas próximas'}`;
+  }
+  $('home-sub-resurtidos').textContent = prox.length ? prox.length + ' próximo' + (prox.length === 1 ? '' : 's') : 'Nada próximo';
+  $('home-sub-citas').textContent = proxCita ? fechaCorta(proxCita.date) : 'Sin citas';
+}
+function irARespaldo() {
+  switchTab('mas');
+  const el = document.getElementById('respaldo-section');
+  if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
 }
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.onclick = () => switchTab(btn.dataset.tab);
@@ -724,6 +777,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 /* ── Render general ── */
 function renderAll() {
+  renderInicio();
   renderResurtidos();
   renderConsumo();
   renderRecetas();
@@ -1564,7 +1618,7 @@ $('btn-borrar-todo').onclick = () => {
 applyTheme(localStorage.getItem('med_dark') === '1');
 loadData();
 renderAll();
-switchTab('resurtidos');
+switchTab('inicio');
 </script>
 </body>
 </html>
