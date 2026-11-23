@@ -841,7 +841,7 @@ function renderResurtidos() {
   // Y solo se muestran los resurtidos a 7 días o menos (y los vencidos); el resto aparece una semana antes.
   const esSoloConsumo = m => m.seguimiento_consumo && !m.refillDate && m.specialtyId == null;
   const base = data.medications.filter(m => !esSoloConsumo(m));
-  const medsR = base.filter(m => !m.refillDate || dayDiff(m.refillDate) <= 7);
+  const medsR = base.filter(m => m.status !== 'terminado' && m.status !== 'suspendido' && (!m.refillDate || dayDiff(m.refillDate) <= 7));
   const vigentes = data.specialties.filter(s => s.status === 'vigente');
   const noVigentes = data.specialties.filter(s => s.status === 'no_vigente');
   const sinEsp = medsR.filter(m => m.specialtyId == null);
